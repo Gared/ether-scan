@@ -1,9 +1,9 @@
 {
-  "name": "gared/etherpad-scanner",
-  "description": "A simple scanner for Etherpad",
+  "name": "gared/ether-scan",
+  "description": "A simple scanner for Etherpad instances",
   "autoload": {
     "psr-4" : {
-      "Gared\\EtherpadScanner\\" : "src/"
+      "Gared\\EtherScan\\": "src/"
     }
   },
   "require": {
