@@ -5,6 +5,7 @@ namespace Gared\EtherScan\Service;
 
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
+use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
@@ -32,7 +33,7 @@ class ScannerService
             'timeout' => 2.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/0.1.0',
+                'User-Agent' => 'EtherpadScanner/1.0.0',
             ],
             'verify' => false,
         ]);
@@ -42,15 +43,18 @@ class ScannerService
         $this->githubApi = new GithubApi();
     }
 
+    /**
+     * @throws EtherpadServiceNotFoundException
+     */
     public function scan(ScannerServiceCallbackInterface $callback): void
     {
         $this->versionRanges = [];
 
         $this->scanApi($callback);
         $this->scanStaticFiles($callback);
+        $this->scanPad($callback);
         $this->scanAdmin($callback);
         $this->scanPlugins($callback);
-        $this->scanPad($callback);
     }
 
     private function scanApi(ScannerServiceCallbackInterface $callback): void
@@ -107,6 +111,9 @@ class ScannerService
         $this->getAdmin('user', 'changeme1', $callback);
     }
 
+    /**
+     * @throws EtherpadServiceNotFoundException
+     */
     private function scanPad(ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanPadStart();
@@ -114,6 +121,9 @@ class ScannerService
             $this->client->get('/p/test');
             $callback->onScanPadSuccess();
         } catch (GuzzleException $e) {
+            if ($e->getCode() === 404) {
+                throw new EtherpadServiceNotFoundException('Etherpad service not found');
+            }
             $callback->onScanPadException($e);
         }
     }
