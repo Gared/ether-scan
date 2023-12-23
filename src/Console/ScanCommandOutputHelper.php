@@ -119,6 +119,11 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             return;
         }
 
+        if ($minVersion === $maxVersion) {
+            $this->symfonyStyle->info('Version is ' . $maxVersion);
+            return;
+        }
+
         $this->symfonyStyle->info('Version between ' . $minVersion . ' and ' . $maxVersion);
     }
 }
