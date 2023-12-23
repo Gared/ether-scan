@@ -6,7 +6,6 @@ namespace Gared\EtherScan\Service;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -127,7 +126,7 @@ class ScannerService
             ]);
 
             $callback->onScanAdminResult($user, $password, true);
-        } catch (ClientException $e) {
+        } catch (GuzzleException) {
             $callback->onScanAdminResult($user, $password, false);
         }
     }
@@ -182,7 +181,7 @@ class ScannerService
             $response = $this->client->get($path);
             $body = (string) $response->getBody();
             return hash('md5', $body);
-        } catch (ClientException) {
+        } catch (GuzzleException) {
         }
 
         return null;
