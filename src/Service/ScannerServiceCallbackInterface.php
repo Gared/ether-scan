@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Service;
+namespace Gared\EtherScan\Service;
 
 use Exception;
-use Gared\EtherpadScanner\Model\VersionRange;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;

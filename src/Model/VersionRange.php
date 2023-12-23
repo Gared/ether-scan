@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Model;
+namespace Gared\EtherScan\Model;
 
 class VersionRange
 {

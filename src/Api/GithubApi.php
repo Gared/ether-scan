@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Api;
+namespace Gared\EtherScan\Api;
 
 use Exception;
 use GuzzleHttp\Client;

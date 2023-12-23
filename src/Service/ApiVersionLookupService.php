@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Service;
+namespace Gared\EtherScan\Service;
 
-use Gared\EtherpadScanner\Model\VersionRange;
+use Gared\EtherScan\Model\VersionRange;
 
 class ApiVersionLookupService
 {

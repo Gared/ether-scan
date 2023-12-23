@@ -2,7 +2,7 @@
 <?php
 declare(strict_types=1);
 
-use Gared\EtherpadScanner\Console\ScanCommand;
+use Gared\EtherScan\Console\ScanCommand;
 use Symfony\Component\Console\Application;
 
 require __DIR__ . '/../vendor/autoload.php';

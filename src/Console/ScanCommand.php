@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Console;
+namespace Gared\EtherScan\Console;
 
-use Gared\EtherpadScanner\Service\ScannerService;
+use Gared\EtherScan\Service\ScannerService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

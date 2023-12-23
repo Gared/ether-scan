@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherpadScanner\Service;
+namespace Gared\EtherScan\Service;
 
 use Exception;
-use Gared\EtherpadScanner\Api\GithubApi;
+use Gared\EtherScan\Api\GithubApi;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
