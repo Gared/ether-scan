@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -26,7 +27,7 @@ class ScannerService
     public function __construct(
         string $url,
     ) {
-        $stack = new HandlerStack();
+        $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
 
         $this->client = new Client([
@@ -36,6 +37,7 @@ class ScannerService
             RequestOptions::HEADERS => [
                 'User-Agent' => 'EtherpadScanner/1.0.0',
             ],
+            'handler' => $stack,
             'verify' => false,
         ]);
 
@@ -119,7 +121,10 @@ class ScannerService
     {
         $callback->onScanPadStart();
         try {
-            $this->client->get('/p/test');
+            $response = $this->client->get('/p/test');
+            if ($response->getStatusCode() !== 200) {
+                throw new EtherpadServiceNotFoundException('Etherpad service not found');
+            }
             $callback->onScanPadSuccess();
         } catch (GuzzleException $e) {
             if ($e->getCode() === 404 || $e instanceof TransferException) {
