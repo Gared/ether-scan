@@ -163,14 +163,21 @@ class ScannerService
                 'protocolVersion' => 2,
             ]);
 
-            $result = $socketIoClient->drain();
-            if ($result !== null && $result->data !== null) {
-                $data = $result->data;
-                $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
-                $this->packageVersion = $version;
-                $callback->onClientVars($version, $result->data);
-                $callback->onScanPadSuccess();
+            $expirationTime = microtime(true) + 2;
+
+            while(microtime(true) < $expirationTime) {
+                usleep(10000);
+                $result = $socketIoClient->drain();
+                if ($result !== null && $result->data !== null) {
+                    $data = $result->data;
+                    $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+                    $this->packageVersion = $version;
+                    $callback->onClientVars($version, $result->data);
+                    $callback->onScanPadSuccess();
+                }
             }
+
+
         } catch (ServerConnectionFailureException $e) {
             $callback->onScanPadException($e);
         }
