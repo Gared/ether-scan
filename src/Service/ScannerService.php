@@ -164,7 +164,7 @@ class ScannerService
             ]);
 
             $result = $socketIoClient->drain();
-            if ($result !== null) {
+            if ($result !== null && $result->data !== null) {
                 $data = $result->data;
                 $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
                 $this->packageVersion = $version;
