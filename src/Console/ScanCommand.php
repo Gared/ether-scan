@@ -24,7 +24,7 @@ class ScanCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $outputHelper = new ScanCommandOutputHelper(new SymfonyStyle($input, $output));
+        $outputHelper = new ScanCommandOutputHelper(new SymfonyStyle($input, $output), $output);
 
         $scanner = new ScannerService($input->getArgument('url'));
         $scanner->scan($outputHelper);

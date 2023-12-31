@@ -8,6 +8,9 @@ use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
@@ -15,6 +18,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 {
     public function __construct(
         private readonly SymfonyStyle $symfonyStyle,
+        private readonly OutputInterface $output,
     ) {
     }
 
@@ -136,5 +140,10 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
     public function onClientVars(string $version, array $data): void
     {
         $this->symfonyStyle->info('Package version: ' . $version);
+    }
+
+    public function getConsoleLogger(): ?LoggerInterface
+    {
+        return new ConsoleLogger($this->output);
     }
 }

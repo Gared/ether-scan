@@ -7,6 +7,7 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 interface ScannerServiceCallbackInterface
@@ -42,4 +43,6 @@ interface ScannerServiceCallbackInterface
     public function onVersionResult(?string $minVersion, ?string $maxVersion): void;
 
     public function onClientVars(string $version, array $data): void;
+
+    public function getConsoleLogger(): ?LoggerInterface;
 }

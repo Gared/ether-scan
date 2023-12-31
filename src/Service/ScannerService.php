@@ -16,6 +16,7 @@ use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 
 class ScannerService
 {
@@ -147,7 +148,7 @@ class ScannerService
 
         $socketIoClient = new \ElephantIO\Client(\ElephantIO\Client::engine($socketIoVersion, $this->url . '/socket.io/', [
             'persistent' => false
-        ]));
+        ]), $callback->getConsoleLogger());
 
         try {
             $socketIoClient->initialize();
@@ -155,15 +156,21 @@ class ScannerService
             $socketIoClient->emit('message', [
                 'component' => 'pad',
                 'type' => 'CLIENT_READY',
-                'padId' => 'test',
-                'sessionID' => 'test',
+                'padId' => 'blub',
+                'sessionID' => 'null',
+                'token' => 't.vbWE289T3YggPgRVvvuP',
+                'password' => null,
+                'protocolVersion' => 2,
             ]);
-            $retval = $socketIoClient->wait('message');
-            $data = $retval->data;
-            $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
-            $this->packageVersion = $version;
-            $callback->onClientVars($version, $retval->data);
-            $callback->onScanPadSuccess();
+
+            $result = $socketIoClient->drain();
+            if ($result !== null) {
+                $data = $result->data;
+                $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+                $this->packageVersion = $version;
+                $callback->onClientVars($version, $result->data);
+                $callback->onScanPadSuccess();
+            }
         } catch (ServerConnectionFailureException $e) {
             $callback->onScanPadException($e);
         }
@@ -206,14 +213,15 @@ class ScannerService
         $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad.js', $hash);
         $hash = $this->getFileHash('static/js/pad_utils.js');
         $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad_utils.js', $hash);
-
-        if ($this->packageVersion !== null) {
-            $callback->onVersionResult($this->packageVersion, $this->packageVersion);
-        }
     }
 
     private function calculateVersion(ScannerServiceCallbackInterface $callback): void
     {
+        if ($this->packageVersion !== null) {
+            $callback->onVersionResult($this->packageVersion, $this->packageVersion);
+            return;
+        }
+
         $maxVersion = null;
         $minVersion = null;
         foreach ($this->versionRanges as $version) {
