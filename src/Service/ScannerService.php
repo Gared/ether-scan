@@ -168,7 +168,7 @@ class ScannerService
             while(microtime(true) < $expirationTime) {
                 usleep(10000);
                 $result = $socketIoClient->drain();
-                if ($result !== null && $result->data !== null) {
+                if ($result !== null && is_array($result->data)) {
                     $data = $result->data;
                     $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
                     $this->packageVersion = $version;
