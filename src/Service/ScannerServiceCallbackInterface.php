@@ -7,6 +7,7 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 interface ScannerServiceCallbackInterface
 {
@@ -34,9 +35,11 @@ interface ScannerServiceCallbackInterface
 
     public function onScanPadStart(): void;
 
-    public function onScanPadException(GuzzleException $e): void;
+    public function onScanPadException(Throwable $e): void;
 
     public function onScanPadSuccess(): void;
 
-    public function onScanStaticFilesResult(?string $minVersion, ?string $maxVersion): void;
+    public function onVersionResult(?string $minVersion, ?string $maxVersion): void;
+
+    public function onClientVars(string $version, array $data): void;
 }

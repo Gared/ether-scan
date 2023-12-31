@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 {
@@ -60,6 +61,11 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
     public function onScanPluginsList(array $plugins): void
     {
+        if (count($plugins) === 0) {
+            $this->symfonyStyle->info('No plugins found');
+            return;
+        }
+
         $this->symfonyStyle->listing(array_keys($plugins));
     }
 
@@ -88,7 +94,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->title('Starting scan of a pad...');
     }
 
-    public function onScanPadException(GuzzleException $e): void
+    public function onScanPadException(Throwable $e): void
     {
         $this->symfonyStyle->error($e->getMessage());
     }
@@ -98,7 +104,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->success('Pads are publicly accessible');
     }
 
-    public function onScanStaticFilesResult(?string $minVersion, ?string $maxVersion): void
+    public function onVersionResult(?string $minVersion, ?string $maxVersion): void
     {
         if ($maxVersion === null && $minVersion === null) {
             $this->symfonyStyle->info('Could not determine version');
@@ -125,5 +131,10 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         }
 
         $this->symfonyStyle->info('Version between ' . $minVersion . ' and ' . $maxVersion);
+    }
+
+    public function onClientVars(string $version, array $data): void
+    {
+        $this->symfonyStyle->info('Package version: ' . $version);
     }
 }

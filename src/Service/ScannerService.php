@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Service;
 
+use ElephantIO\Exception\ServerConnectionFailureException;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
@@ -21,21 +22,26 @@ class ScannerService
     private readonly ApiVersionLookupService $versionLookup;
     private readonly GithubApi $githubApi;
     private readonly Client $client;
+    private readonly string $url;
     private readonly FileHashLookupService $fileHashLookup;
     private array $versionRanges;
+    private ?string $apiVersion = null;
+    private ?string $packageVersion = null;
 
     public function __construct(
-        string $url,
+        string $url
     ) {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
+
+        $this->url = $url;
 
         $this->client = new Client([
             'base_uri' => $url,
             'timeout' => 2.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/1.0.0',
+                'User-Agent' => 'EtherpadScanner/1.1.0',
             ],
             'handler' => $stack,
             'verify' => false,
@@ -56,6 +62,7 @@ class ScannerService
         $this->scanApi($callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
+        $this->calculateVersion($callback);
         $this->scanAdmin($callback);
         $this->scanPlugins($callback);
     }
@@ -83,6 +90,7 @@ class ScannerService
                 $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
                 $apiVersion = $data['currentVersion'];
                 $versionRange = $this->versionLookup->getEtherpadVersionRange($apiVersion);
+                $this->apiVersion = $apiVersion;
                 $callback->onScanApiVersion($apiVersion);
                 $this->versionRanges[] = $versionRange;
             } catch (JsonException $e) {
@@ -125,11 +133,38 @@ class ScannerService
             if ($response->getStatusCode() !== 200) {
                 throw new EtherpadServiceNotFoundException('Etherpad service not found');
             }
-            $callback->onScanPadSuccess();
         } catch (GuzzleException $e) {
             if ($e->getCode() === 404 || $e instanceof TransferException) {
                 throw new EtherpadServiceNotFoundException('Etherpad service not found');
             }
+            $callback->onScanPadException($e);
+        }
+
+        $socketIoVersion = \ElephantIO\Client::CLIENT_2X;
+        if (version_compare($this->apiVersion ?? '', '1.2.13', '<=')) {
+            $socketIoVersion = \ElephantIO\Client::CLIENT_1X;
+        }
+
+        $socketIoClient = new \ElephantIO\Client(\ElephantIO\Client::engine($socketIoVersion, $this->url . '/socket.io/', [
+            'persistent' => false
+        ]));
+
+        try {
+            $socketIoClient->initialize();
+            $socketIoClient->of('/');
+            $socketIoClient->emit('message', [
+                'component' => 'pad',
+                'type' => 'CLIENT_READY',
+                'padId' => 'test',
+                'sessionID' => 'test',
+            ]);
+            $retval = $socketIoClient->wait('message');
+            $data = $retval->data;
+            $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+            $this->packageVersion = $version;
+            $callback->onClientVars($version, $retval->data);
+            $callback->onScanPadSuccess();
+        } catch (ServerConnectionFailureException $e) {
             $callback->onScanPadException($e);
         }
     }
@@ -172,6 +207,13 @@ class ScannerService
         $hash = $this->getFileHash('static/js/pad_utils.js');
         $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad_utils.js', $hash);
 
+        if ($this->packageVersion !== null) {
+            $callback->onVersionResult($this->packageVersion, $this->packageVersion);
+        }
+    }
+
+    private function calculateVersion(ScannerServiceCallbackInterface $callback): void
+    {
         $maxVersion = null;
         $minVersion = null;
         foreach ($this->versionRanges as $version) {
@@ -188,7 +230,7 @@ class ScannerService
             }
         }
 
-        $callback->onScanStaticFilesResult($minVersion, $maxVersion);
+        $callback->onVersionResult($minVersion, $maxVersion);
     }
 
     private function getFileHash(string $path): ?string
