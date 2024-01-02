@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Service;
 
+use ElephantIO\Client as ElephantClient;
 use ElephantIO\Exception\ServerConnectionFailureException;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
@@ -16,7 +17,6 @@ use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 
 class ScannerService
 {
@@ -141,12 +141,12 @@ class ScannerService
             $callback->onScanPadException($e);
         }
 
-        $socketIoVersion = \ElephantIO\Client::CLIENT_2X;
+        $socketIoVersion = ElephantClient::CLIENT_2X;
         if (version_compare($this->apiVersion ?? '', '1.2.13', '<=')) {
-            $socketIoVersion = \ElephantIO\Client::CLIENT_1X;
+            $socketIoVersion = ElephantClient::CLIENT_1X;
         }
 
-        $socketIoClient = new \ElephantIO\Client(\ElephantIO\Client::engine($socketIoVersion, $this->url . '/socket.io/', [
+        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
             'persistent' => false
         ]), $callback->getConsoleLogger());
 
@@ -156,7 +156,7 @@ class ScannerService
             $socketIoClient->emit('message', [
                 'component' => 'pad',
                 'type' => 'CLIENT_READY',
-                'padId' => 'blub',
+                'padId' => 'test',
                 'sessionID' => 'null',
                 'token' => 't.vbWE289T3YggPgRVvvuP',
                 'password' => null,
@@ -169,6 +169,10 @@ class ScannerService
                 usleep(10000);
                 $result = $socketIoClient->drain();
                 if ($result !== null && is_array($result->data)) {
+                    if ($result->data['accessStatus'] === 'deny') {
+                        $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessbile'));
+                        return;
+                    }
                     $data = $result->data;
                     $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
                     $this->packageVersion = $version;
@@ -176,8 +180,6 @@ class ScannerService
                     $callback->onScanPadSuccess();
                 }
             }
-
-
         } catch (ServerConnectionFailureException $e) {
             $callback->onScanPadException($e);
         }

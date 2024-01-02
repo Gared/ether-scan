@@ -80,7 +80,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
     public function onScanAdminStart(): void
     {
-        $this->symfonyStyle->title('Starting scan of admina area...');
+        $this->symfonyStyle->title('Starting scan of admin area...');
     }
 
     public function onScanAdminResult(string $user, string $password, bool $result): void
