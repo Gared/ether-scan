@@ -25,9 +25,11 @@ class ScannerService
     private readonly Client $client;
     private readonly string $url;
     private readonly FileHashLookupService $fileHashLookup;
+    private readonly RevisionLookupService $revisionLookup;
     private array $versionRanges;
     private ?string $apiVersion = null;
     private ?string $packageVersion = null;
+    private ?string $revisionVersion = null;
 
     public function __construct(
         string $url
@@ -50,6 +52,7 @@ class ScannerService
 
         $this->versionLookup = new ApiVersionLookupService();
         $this->fileHashLookup = new FileHashLookupService();
+        $this->revisionLookup = new RevisionLookupService();
         $this->githubApi = new GithubApi();
     }
 
@@ -82,6 +85,7 @@ class ScannerService
 
                 $commit = $this->githubApi->getCommit($revision);
                 if ($commit !== null) {
+                    $this->revisionVersion = $this->revisionLookup->getVersion($commit['sha']);
                     $callback->onScanApiRevisionCommit($commit);
                 }
             }
@@ -228,6 +232,11 @@ class ScannerService
     {
         if ($this->packageVersion !== null) {
             $callback->onVersionResult($this->packageVersion, $this->packageVersion);
+            return;
+        }
+
+        if ($this->revisionVersion !== null) {
+            $callback->onVersionResult($this->revisionVersion, $this->revisionVersion);
             return;
         }
 

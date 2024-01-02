@@ -27,4 +27,15 @@ class GithubApi
             return null;
         }
     }
+
+    public function getTags(): ?array
+    {
+        try {
+            $response = $this->client->get('/repos/ether/etherpad-lite/tags?per_page=100');
+            $body = (string)$response->getBody();
+            return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Exception) {
+            return null;
+        }
+    }
 }
