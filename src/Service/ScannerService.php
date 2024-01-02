@@ -173,7 +173,8 @@ class ScannerService
                 usleep(10000);
                 $result = $socketIoClient->drain();
                 if ($result !== null && is_array($result->data)) {
-                    if ($result->data['accessStatus'] === 'deny') {
+                    $accessStatus = $result->data['accessStatus'] ?? null;
+                    if ($accessStatus === 'deny') {
                         $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessbile'));
                         return;
                     }
