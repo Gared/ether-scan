@@ -179,7 +179,7 @@ class ScannerService
                         return;
                     }
                     $data = $result->data;
-                    if ($data['data']['type'] === 'CUSTOM') {
+                    if (isset($data['data']['type']) && $data['data']['type'] === 'CUSTOM') {
                         continue;
                     }
 
