@@ -175,10 +175,14 @@ class ScannerService
                 if ($result !== null && is_array($result->data)) {
                     $accessStatus = $result->data['accessStatus'] ?? null;
                     if ($accessStatus === 'deny') {
-                        $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessbile'));
+                        $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
                         return;
                     }
                     $data = $result->data;
+                    if ($data['data']['type'] === 'CUSTOM') {
+                        continue;
+                    }
+
                     $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
                     $this->packageVersion = $version;
                     $callback->onClientVars($version, $result->data);
