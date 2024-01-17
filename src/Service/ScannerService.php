@@ -132,9 +132,11 @@ class ScannerService
      */
     private function scanPad(ScannerServiceCallbackInterface $callback): void
     {
+        $padId = 'test' . rand(1, 99999);
+
         $callback->onScanPadStart();
         try {
-            $response = $this->client->get('/p/test');
+            $response = $this->client->get('/p/' . $padId);
             if ($response->getStatusCode() !== 200) {
                 throw new EtherpadServiceNotFoundException('Etherpad service not found');
             }
@@ -160,7 +162,7 @@ class ScannerService
             $socketIoClient->emit('message', [
                 'component' => 'pad',
                 'type' => 'CLIENT_READY',
-                'padId' => 'test',
+                'padId' => $padId,
                 'sessionID' => 'null',
                 'token' => 't.vbWE289T3YggPgRVvvuP',
                 'password' => null,
