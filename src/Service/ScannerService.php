@@ -148,7 +148,7 @@ class ScannerService
         }
 
         $socketIoVersion = ElephantClient::CLIENT_2X;
-        if (version_compare($this->apiVersion ?? '', '1.2.13', '<=')) {
+        if (version_compare($this->apiVersion ?? '999', '1.2.13', '<=')) {
             $socketIoVersion = ElephantClient::CLIENT_1X;
         }
 
