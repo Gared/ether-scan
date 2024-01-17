@@ -189,8 +189,11 @@ class ScannerService
                     $this->packageVersion = $version;
                     $callback->onClientVars($version, $result->data);
                     $callback->onScanPadSuccess();
+                    break;
                 }
             }
+
+            $socketIoClient->close();
         } catch (ServerConnectionFailureException $e) {
             $callback->onScanPadException($e);
         }
