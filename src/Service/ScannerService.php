@@ -9,6 +9,7 @@ use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\HandlerStack;
@@ -36,6 +37,7 @@ class ScannerService
     ) {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
+        $stack->push(Middleware::cookies(), 'cookies');
 
         $this->url = $url;
 
@@ -135,8 +137,11 @@ class ScannerService
         $padId = 'test' . rand(1, 99999);
 
         $callback->onScanPadStart();
+        $cookies = new CookieJar();
         try {
-            $response = $this->client->get('/p/' . $padId);
+            $response = $this->client->get('/p/' . $padId, [
+                'cookies' => $cookies,
+            ]);
             if ($response->getStatusCode() !== 200) {
                 throw new EtherpadServiceNotFoundException('Etherpad service not found');
             }
@@ -152,6 +157,12 @@ class ScannerService
             $socketIoVersion = ElephantClient::CLIENT_1X;
         }
 
+        $cookieString = '';
+        foreach ($cookies as $cookie) {
+            $cookieString .= $cookie->getName() . '=' . $cookie->getValue() . ';';
+        }
+        $token = 't.vbWE289T3YggPgRVvvuP';
+
         $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
             'persistent' => false,
             'use_b64' => 1,
@@ -161,6 +172,9 @@ class ScannerService
                     'verify_peer_name' => false,
                 ],
             ],
+            'headers' => [
+                'Cookie' => $cookieString,
+            ]
         ]), $callback->getConsoleLogger());
 
         try {
@@ -171,7 +185,7 @@ class ScannerService
                 'type' => 'CLIENT_READY',
                 'padId' => $padId,
                 'sessionID' => 'null',
-                'token' => 't.vbWE289T3YggPgRVvvuP',
+                'token' => $token,
                 'password' => null,
                 'protocolVersion' => 2,
             ]);
