@@ -215,7 +215,7 @@ class ScannerService
             }
 
             $socketIoClient->close();
-        } catch (ServerConnectionFailureException $e) {
+        } catch (Exception $e) {
             $callback->onScanPadException($e);
         }
     }
