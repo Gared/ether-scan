@@ -155,6 +155,12 @@ class ScannerService
         $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
             'persistent' => false,
             'use_b64' => 1,
+            'context' => [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ],
         ]), $callback->getConsoleLogger());
 
         try {
