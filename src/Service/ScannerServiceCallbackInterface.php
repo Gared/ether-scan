@@ -32,11 +32,11 @@ interface ScannerServiceCallbackInterface
 
     public function onStatsResult(array $data): void;
 
-    public function onStatsException(Exception $e): void;
+    public function onStatsException(GuzzleException|JsonException $e): void;
 
     public function onHealthResult(array $data): void;
 
-    public function onHealthException(Exception $e): void;
+    public function onHealthException(GuzzleException|JsonException $e): void;
 
     public function onScanAdminStart(): void;
 

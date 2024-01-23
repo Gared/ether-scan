@@ -87,7 +87,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->info('Stats: ' . print_r($data, true));
     }
 
-    public function onStatsException(Exception $e): void
+    public function onStatsException(GuzzleException|JsonException $e): void
     {
         $this->symfonyStyle->error($e->getMessage());
     }
@@ -101,7 +101,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->info('Stats: ' . print_r($data, true));
     }
 
-    public function onHealthException(Exception $e): void
+    public function onHealthException(GuzzleException|JsonException $e): void
     {
         $this->symfonyStyle->error($e->getMessage());
     }

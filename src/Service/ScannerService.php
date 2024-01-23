@@ -313,8 +313,8 @@ class ScannerService
     {
         try {
             $response = $this->client->get('/stats');
-            $callback->onStatsResult(json_decode($response->getBody()->__toString(), true));
-        } catch (GuzzleException $e) {
+            $callback->onStatsResult(json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR));
+        } catch (GuzzleException|JsonException $e) {
             $callback->onStatsException($e);
         }
     }
@@ -323,10 +323,10 @@ class ScannerService
     {
         try {
             $response = $this->client->get('/health');
-            $healthData = json_decode($response->getBody()->__toString(), true);
+            $healthData = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
             $callback->onHealthResult($healthData);
             $this->healthVersion = $healthData['releaseId'];
-        } catch (GuzzleException $e) {
+        } catch (GuzzleException|JsonException $e) {
             $callback->onHealthException($e);
         }
     }
