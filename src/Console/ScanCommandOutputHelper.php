@@ -82,9 +82,11 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
     public function onStatsResult(array $data): void
     {
-        $startTime = new DateTimeImmutable('@' . ($data['httpStartTime'] / 1000));
-        $this->symfonyStyle->info('Server running since: ' . $startTime->format(DateTimeInterface::RFC3339));
-        $this->symfonyStyle->info('Stats: ' . print_r($data, true));
+        if (isset($data['httpStartTime'])) {
+            $startTime = new DateTimeImmutable('@' . ($data['httpStartTime'] / 1000));
+            $this->symfonyStyle->info('Server running since: ' . $startTime->format(DateTimeInterface::RFC3339));
+        }
+        $this->output->writeln('Stats: ' . print_r($data, true), OutputInterface::VERBOSITY_DEBUG);
     }
 
     public function onStatsException(GuzzleException|JsonException $e): void
@@ -98,7 +100,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             $this->symfonyStyle->success('Server is healthy');
             return;
         }
-        $this->symfonyStyle->info('Stats: ' . print_r($data, true));
+        $this->symfonyStyle->error('Health: ' . print_r($data, true));
     }
 
     public function onHealthException(GuzzleException|JsonException $e): void
