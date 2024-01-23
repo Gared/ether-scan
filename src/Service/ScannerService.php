@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use ElephantIO\Client as ElephantClient;
-use ElephantIO\Exception\ServerConnectionFailureException;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
@@ -31,6 +30,7 @@ class ScannerService
     private ?string $apiVersion = null;
     private ?string $packageVersion = null;
     private ?string $revisionVersion = null;
+    private ?string $healthVersion = null;
 
     public function __construct(
         string $url
@@ -68,7 +68,9 @@ class ScannerService
         $this->scanApi($callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
+        $this->scanHealth($callback);
         $this->calculateVersion($callback);
+        $this->scanStats($callback);
         $this->scanAdmin($callback);
         $this->scanPlugins($callback);
     }
@@ -266,6 +268,11 @@ class ScannerService
             return;
         }
 
+        if ($this->healthVersion !== null) {
+            $callback->onVersionResult($this->healthVersion, $this->healthVersion);
+            return;
+        }
+
         if ($this->revisionVersion !== null) {
             $callback->onVersionResult($this->revisionVersion, $this->revisionVersion);
             return;
@@ -300,5 +307,27 @@ class ScannerService
         }
 
         return null;
+    }
+
+    private function scanStats(ScannerServiceCallbackInterface $callback): void
+    {
+        try {
+            $response = $this->client->get('/stats');
+            $callback->onStatsResult(json_decode($response->getBody()->__toString(), true));
+        } catch (GuzzleException $e) {
+            $callback->onStatsException($e);
+        }
+    }
+
+    private function scanHealth(ScannerServiceCallbackInterface $callback): void
+    {
+        try {
+            $response = $this->client->get('/health');
+            $healthData = json_decode($response->getBody()->__toString(), true);
+            $callback->onHealthResult($healthData);
+            $this->healthVersion = $healthData['releaseId'];
+        } catch (GuzzleException $e) {
+            $callback->onHealthException($e);
+        }
     }
 }

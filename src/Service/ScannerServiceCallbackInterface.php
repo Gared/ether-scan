@@ -30,6 +30,14 @@ interface ScannerServiceCallbackInterface
 
     public function onScanPluginsException(Exception $e): void;
 
+    public function onStatsResult(array $data): void;
+
+    public function onStatsException(Exception $e): void;
+
+    public function onHealthResult(array $data): void;
+
+    public function onHealthException(Exception $e): void;
+
     public function onScanAdminStart(): void;
 
     public function onScanAdminResult(string $user, string $password, bool $result): void;

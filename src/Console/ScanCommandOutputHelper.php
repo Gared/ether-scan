@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Console;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Exception;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -74,6 +76,32 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
     }
 
     public function onScanPluginsException(Exception $e): void
+    {
+        $this->symfonyStyle->error($e->getMessage());
+    }
+
+    public function onStatsResult(array $data): void
+    {
+        $startTime = new DateTimeImmutable('@' . ($data['httpStartTime'] / 1000));
+        $this->symfonyStyle->info('Server running since: ' . $startTime->format(DateTimeInterface::RFC3339));
+        $this->symfonyStyle->info('Stats: ' . print_r($data, true));
+    }
+
+    public function onStatsException(Exception $e): void
+    {
+        $this->symfonyStyle->error($e->getMessage());
+    }
+
+    public function onHealthResult(array $data): void
+    {
+        if (isset($data['status']) && $data['status'] === 'pass') {
+            $this->symfonyStyle->success('Server is healthy');
+            return;
+        }
+        $this->symfonyStyle->info('Stats: ' . print_r($data, true));
+    }
+
+    public function onHealthException(Exception $e): void
     {
         $this->symfonyStyle->error($e->getMessage());
     }
