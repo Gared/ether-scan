@@ -32,6 +32,7 @@ class GenerateFileHashesCommand extends Command
 
         $fileHashLookup = new FileHashLookupService();
 
+        $attributePoolHash = $this->getFileHash($url, 'static/js/AttributePool.js');
         $attributesHash = $this->getFileHash($url, 'static/js/attributes.js');
         $padEditbarHash = $this->getFileHash($url, 'static/js/pad_editbar.js');
         $padHash = $this->getFileHash($url, 'static/js/pad.js');
@@ -39,6 +40,7 @@ class GenerateFileHashesCommand extends Command
 
         $symfonyStyle = new SymfonyStyle($input, $output);
         $symfonyStyle->table(['File', 'Hash', 'Version'], [
+            ['static/js/AttributePool.js', $attributePoolHash, $fileHashLookup->getEtherpadVersionRange('static/js/AttributePool.js', $attributePoolHash)],
             ['static/js/attributes.js', $attributesHash, $fileHashLookup->getEtherpadVersionRange('static/js/attributes.js', $attributesHash)],
             ['static/js/pad_editbar.js', $padEditbarHash, $fileHashLookup->getEtherpadVersionRange('static/js/pad_editbar.js', $padEditbarHash)],
             ['static/js/pad.js', $padHash, $fileHashLookup->getEtherpadVersionRange('static/js/pad.js', $padHash)],
