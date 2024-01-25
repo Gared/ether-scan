@@ -10,7 +10,6 @@ use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\RequestOptions;
@@ -148,9 +147,6 @@ class ScannerService
                 throw new EtherpadServiceNotFoundException('Etherpad service not found');
             }
         } catch (GuzzleException $e) {
-            if ($e->getCode() === 404 || $e instanceof TransferException) {
-                throw new EtherpadServiceNotFoundException('Etherpad service not found');
-            }
             $callback->onScanPadException($e);
         }
 
