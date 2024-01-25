@@ -46,7 +46,7 @@ class ScannerService
             'timeout' => 2.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/1.1.0',
+                'User-Agent' => 'EtherpadScanner/2.0.0',
             ],
             'handler' => $stack,
             'verify' => false,
