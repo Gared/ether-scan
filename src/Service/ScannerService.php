@@ -351,7 +351,14 @@ class ScannerService
         $body = (string)$response->getBody();
         $body = substr($body, strpos($body, '['));
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        $version = $data[1]['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+        $data = $data[1];
+        $accessStatus = $data['accessStatus'] ?? null;
+        if ($accessStatus === 'deny') {
+            $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
+            return;
+        }
+
+        $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
         $this->packageVersion = $version;
         $callback->onClientVars($version, $data[1]);
         $callback->onScanPadSuccess();
