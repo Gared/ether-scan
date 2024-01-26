@@ -303,6 +303,10 @@ class ScannerService
             'cookies' => $cookies,
         ]);
         $body = (string)$response->getBody();
+        if ($body === 'Welcome to socket.io.') {
+            $this->packageVersion = '1.4.0';
+            throw new Exception('Socket.io 1 not supported');
+        }
         $body = substr($body, strpos($body, '{'));
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         $sid = $data['sid'];
