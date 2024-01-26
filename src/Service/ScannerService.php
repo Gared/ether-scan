@@ -360,7 +360,7 @@ class ScannerService
 
         $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
         $this->packageVersion = $version;
-        $callback->onClientVars($version, $data[1]);
+        $callback->onClientVars($version, $data);
         $callback->onScanPadSuccess();
     }
 
