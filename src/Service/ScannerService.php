@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use ElephantIO\Client as ElephantClient;
+use ElephantIO\Yeast;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
@@ -161,60 +162,16 @@ class ScannerService
         }
         $token = 't.vbWE289T3YggPgRVvvuP';
 
-        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
-            'persistent' => false,
-            'use_b64' => 1,
-            'context' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                ],
-            ],
-            'headers' => [
-                'Cookie' => $cookieString,
-            ]
-        ]), $callback->getConsoleLogger());
-
         try {
-            $socketIoClient->initialize();
-            $socketIoClient->of('/');
-            $socketIoClient->emit('message', [
-                'component' => 'pad',
-                'type' => 'CLIENT_READY',
-                'padId' => $padId,
-                'sessionID' => 'null',
-                'token' => $token,
-                'password' => null,
-                'protocolVersion' => 2,
-            ]);
-
-            $expirationTime = microtime(true) + 2;
-
-            while(microtime(true) < $expirationTime) {
-                usleep(10000);
-                $result = $socketIoClient->drain();
-                if ($result !== null && is_array($result->data)) {
-                    $accessStatus = $result->data['accessStatus'] ?? null;
-                    if ($accessStatus === 'deny') {
-                        $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
-                        return;
-                    }
-                    $data = $result->data;
-                    if (isset($data['data']['type']) && $data['data']['type'] === 'CUSTOM') {
-                        continue;
-                    }
-
-                    $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
-                    $this->packageVersion = $version;
-                    $callback->onClientVars($version, $result->data);
-                    $callback->onScanPadSuccess();
-                    break;
-                }
-            }
-
-            $socketIoClient->close();
+            $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $padId, $token);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
+
+            try {
+                $this->doSocketPolling($padId, $cookies, $token, $callback);
+            } catch (Exception $e) {
+                $callback->onScanPadException($e);
+            }
         }
     }
 
@@ -325,5 +282,138 @@ class ScannerService
         } catch (GuzzleException|JsonException $e) {
             $callback->onHealthException($e);
         }
+    }
+
+    private function doSocketPolling(
+        string $padId,
+        CookieJar $cookies,
+        string $token,
+        ScannerServiceCallbackInterface $callback
+    ): void {
+        $queryParameters = [
+            'padId' => $padId,
+            'EIO' => 3,
+            'transport' => 'polling',
+            't' => Yeast::yeast(),
+            'b64' => 1,
+        ];
+
+        $response = $this->client->get('/socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        $body = substr($body, strpos($body, '{'));
+        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        $sid = $data['sid'];
+
+        $queryParameters['sid'] = $sid;
+        $queryParameters['t'] = Yeast::yeast();
+
+        $response = $this->client->get('/socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        if ($body !== '2:40') {
+            throw new Exception('Invalid response: ' . $body);
+        }
+
+        $postData = json_encode([
+            'message',
+            [
+                'component' => 'pad',
+                'type' => 'CLIENT_READY',
+                'padId' => $padId,
+                'sessionID' => 'null',
+                'token' => $token,
+                'password' => null,
+                'protocolVersion' => 2,
+            ]
+        ]);
+
+        $queryParameters['t'] = Yeast::yeast();
+        $response = $this->client->post('/socket.io/', [
+            'query' => $queryParameters,
+            'body' => (mb_strlen($postData) + 2) . ':42' . $postData,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        if ($body !== 'ok') {
+            throw new Exception('Invalid response: ' . $body);
+        }
+
+        $queryParameters['t'] = Yeast::yeast();
+        $response = $this->client->get('/socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        $body = substr($body, strpos($body, '['));
+        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        $version = $data[1]['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+        $this->packageVersion = $version;
+        $callback->onClientVars($version, $data[1]);
+        $callback->onScanPadSuccess();
+    }
+
+    private function doSocketWebsocket(
+        int $socketIoVersion,
+        string $cookieString,
+        ScannerServiceCallbackInterface $callback,
+        string $padId,
+        string $token
+    ): void {
+        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
+            'persistent' => false,
+            'use_b64' => 1,
+            'context' => [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ],
+            'headers' => [
+                'Cookie' => $cookieString,
+            ]
+        ]), $callback->getConsoleLogger());
+
+        $socketIoClient->initialize();
+        $socketIoClient->of('/');
+        $socketIoClient->emit('message', [
+            'component' => 'pad',
+            'type' => 'CLIENT_READY',
+            'padId' => $padId,
+            'sessionID' => 'null',
+            'token' => $token,
+            'password' => null,
+            'protocolVersion' => 2,
+        ]);
+
+        $expirationTime = microtime(true) + 2;
+
+        while (microtime(true) < $expirationTime) {
+            usleep(10000);
+            $result = $socketIoClient->drain();
+            if ($result !== null && is_array($result->data)) {
+                $accessStatus = $result->data['accessStatus'] ?? null;
+                if ($accessStatus === 'deny') {
+                    $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
+                    return;
+                }
+                $data = $result->data;
+                if (isset($data['data']['type']) && $data['data']['type'] === 'CUSTOM') {
+                    continue;
+                }
+
+                $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+                $this->packageVersion = $version;
+                $callback->onClientVars($version, $result->data);
+                $callback->onScanPadSuccess();
+                break;
+            }
+        }
+
+        $socketIoClient->close();
     }
 }
