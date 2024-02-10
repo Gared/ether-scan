@@ -13,6 +13,8 @@ Starting scan of a pad...
 
  [OK] Pads are publicly accessible
 
+ [OK] Server is healthy
+
  [INFO] Version is 1.9.7
 
 
@@ -28,9 +30,4 @@ Starting scan of admin area...
 Starting scan of plugins...
 ===========================
 
- * ep_align
- * ep_headings2
- * ep_table_of_contents
- * ep_font_size
- * ep_spellcheck
- * ep_markdown
+ [INFO] No plugins found

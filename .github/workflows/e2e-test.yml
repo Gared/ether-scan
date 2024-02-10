@@ -13,8 +13,6 @@ jobs:
     services:
       etherpad:
         image: etherpad/etherpad:latest
-        env:
-          ETHERPAD_PLUGINS: "ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown"
         ports:
           - 9001:9001
 
@@ -37,7 +35,7 @@ jobs:
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: bin/console.php ether:scan http://localhost:9001 | grep -v "Server running since"
+          command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
           assert_file_path: tests/e2e/fixture/latest.txt
           expected_result: PASSED
 
