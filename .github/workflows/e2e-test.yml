@@ -14,7 +14,7 @@ jobs:
       etherpad:
         image: etherpad/etherpad:latest
         env:
-          ETHERPAD_PLUGINS: "ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck sp_markdown"
+          ETHERPAD_PLUGINS: "ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown"
         ports:
           - 9001:9001
 
