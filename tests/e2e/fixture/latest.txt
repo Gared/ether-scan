@@ -1,0 +1,49 @@
+
+Starting scan of api...
+=======================
+
+ [INFO] No revision in server header                                                                                    
+
+ [INFO] api version: 1.2.15                                                                                             
+
+Starting scan of a pad...
+=========================
+
+ [INFO] Package version: 1.8.13                                                                                         
+
+ [OK] Pads are publicly accessible                                                                                      
+
+ [ERROR] Client error: `GET http://185.220.4.137:9001/health` resulted in a `404 Not Found` response:                   
+         <!DOCTYPE html>                                                                                                
+         <html lang="en">                                                                                               
+         <head>                                                                                                         
+         <meta charset="utf-8">                                                                                         
+         <title>Error</title>                                                                                           
+         </head>                                                                                                        
+         <body>                                                                                                         
+         <pre>Cannot GET /heal (truncated...)                                                                           
+
+ [ERROR] You have an old version of etherpad! Please update to 1.9.0 or newer!                                          
+
+ [INFO] Version is 1.9.7
+
+ [INFO] Server running since: 2024-02-02T10:57:40+00:00                                                                 
+
+Starting scan of admin area...
+==============================
+
+ [OK] Admin area is not accessible with admin / admin                                                                   
+
+ [OK] Admin area is not accessible with admin / changeme1                                                               
+
+ [OK] Admin area is not accessible with user / changeme1                                                                
+
+Starting scan of plugins...
+===========================
+
+ * ep_themes
+ * ep_table_of_contents
+ * ep_markdown
+ * ep_headings2
+ * ep_author_hover
+

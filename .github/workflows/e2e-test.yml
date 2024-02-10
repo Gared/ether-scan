@@ -7,20 +7,17 @@ on:
     branches: [ "main" ]
 
 jobs:
-  EtherpadWithLinux:
-    name: Etherpad with Plugins
+  LatestEtherpad:
+    name: Latest etherpad with plugins
     runs-on: ubuntu-latest
     services:
       etherpad:
-        image: etherpad/etherpad:${{ matrix.version }}
+        image: etherpad/etherpad:latest
         env:
           ETHERPAD_PLUGINS: "ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck sp_markdown"
         ports:
           - 9001:9001
 
-    strategy:
-      matrix:
-        version: ["latest", "1.9.0"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,5 +38,40 @@ jobs:
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
-          contains: "Package version: 1.9.7"
+          assert_file_path: tests/e2e/fixture/latest.txt
+          expected_result: PASSED
+
+  EtherpadDifferentVersion:
+    name: Etherpad ${{ matrix.version }} without plugins
+    runs-on: ubuntu-latest
+    services:
+      etherpad:
+        image: etherpad/etherpad:${{ matrix.version }}
+        ports:
+          - 9001:9001
+
+    strategy:
+      matrix:
+        version: ["1.9.7", "1.8.18", "1.8.0", "1.7.5"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: bin/console.php ether:scan http://localhost:9001
+          contains: "Package version: ${{ matrix.version }}"
           expected_result: PASSED
