@@ -31,3 +31,4 @@ Starting scan of plugins...
 ===========================
 
  [INFO] No plugins found
+
