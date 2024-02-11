@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start nginx
-        run: docker run -d --rm -p 8080:80 -d nginx:1.25 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
+        run: docker run --rm -p 8080:80 -d nginx:1.25 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
 
       - name: Cache Composer packages
         id: composer-cache
@@ -34,6 +34,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Debug
+        run: docker ps
 
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
