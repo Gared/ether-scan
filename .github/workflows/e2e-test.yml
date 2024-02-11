@@ -37,7 +37,7 @@ jobs:
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: bin/console.php ether:scan http://localhost:8080 | grep -E "Package version|HTTP/1.1 400" | sed 's/ *$//'
+          command_line: bin/console.php ether:scan -vvv http://localhost:8080 | grep -E "Package version|HTTP/1.1 400" | sed 's/ *$//'
           assert_file_path: tests/e2e/fixture/reverse_proxy_no_websocket.txt
           expected_result: PASSED
 
