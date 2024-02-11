@@ -1,0 +1,107 @@
+name: "E2E tests"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  EtherpadWithPlugins:
+    name: Etherpad with plugins
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone etherpad repository
+      uses: actions/checkout@v4
+      with:
+        repository: ether/etherpad-lite
+        path: etherpad
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - uses: JarvusInnovations/background-action@v1
+      name: Start etherpad service
+      with:
+        run: |
+          npm install --no-save --legacy-peer-deps ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown 
+          src/bin/run.sh &
+        wait-on: |
+          http://localhost:9001
+        tail: true
+        log-output-resume: stderr
+        wait-for: 5m
+        working-directory: etherpad
+
+    - name: Scan etherpad instance
+      uses: GuillaumeFalourd/assert-command-line-output@v2.2
+      with:
+        command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+        assert_file_path: tests/e2e/fixture/master_with_plugins.txt
+        expected_result: PASSED
+
+  LatestEtherpad:
+    name: Latest etherpad
+    runs-on: ubuntu-latest
+    services:
+      etherpad:
+        image: etherpad/etherpad:latest
+        ports:
+          - 9001:9001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+          assert_file_path: tests/e2e/fixture/latest.txt
+          expected_result: PASSED
+
+  EtherpadDifferentVersion:
+    name: Etherpad ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    services:
+      etherpad:
+        image: etherpad/etherpad:${{ matrix.version }}
+        ports:
+          - 9001:9001
+
+    strategy:
+      matrix:
+        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: bin/console.php ether:scan http://localhost:9001
+          contains: "Package version: ${{ matrix.version }}"
+          expected_result: PASSED

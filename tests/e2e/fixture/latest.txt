@@ -1,0 +1,34 @@
+
+Starting scan of api...
+=======================
+
+ [INFO] No revision in server header
+
+ [INFO] api version: 1.3.0
+
+Starting scan of a pad...
+=========================
+
+ [INFO] Package version: 1.9.7
+
+ [OK] Pads are publicly accessible
+
+ [OK] Server is healthy
+
+ [INFO] Version is 1.9.7
+
+
+Starting scan of admin area...
+==============================
+
+ [OK] Admin area is not accessible with admin / admin
+
+ [OK] Admin area is not accessible with admin / changeme1
+
+ [OK] Admin area is not accessible with user / changeme1
+
+Starting scan of plugins...
+===========================
+
+ [INFO] No plugins found
+
