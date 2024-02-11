@@ -7,6 +7,44 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # Add tests for polling etherpad instances (no websocket support)
+  EtherpadWithNginxReverseProxy:
+    name: Etherpad and nginx reverse proxy (no websocket)
+    runs-on: ubuntu-latest
+    services:
+      etherpad:
+        image: etherpad/etherpad:1.9.0
+        ports:
+          - 9001:9001
+      nginx:
+        image: nginx
+        ports:
+          - 8081:8080
+        options: >-
+          -v tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: bin/console.php ether:scan http://localhost:8080
+          contains: "Package version: 1.9.0"
+          expected_result: PASSED
+
   EtherpadWithPlugins:
     name: Etherpad with plugins
     runs-on: ubuntu-latest
