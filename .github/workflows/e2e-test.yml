@@ -11,17 +11,17 @@ jobs:
   EtherpadWithNginxReverseProxy:
     name: Etherpad and nginx reverse proxy (no websocket)
     runs-on: ubuntu-latest
-    services:
-      etherpad:
-        image: etherpad/etherpad:1.9.0
-        ports:
-          - 9001:9001
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: docker network
+        run: docker network create --subnet=172.23.42.0/16 test_net
+
       - name: Start nginx
-        run: docker run --network host --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
+        run: |
+          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.9.0
+          docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
 
       - name: Cache Composer packages
         id: composer-cache
