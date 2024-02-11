@@ -7,8 +7,42 @@ on:
     branches: [ "main" ]
 
 jobs:
+  EtherpadWithPlugins:
+    name: Etherpad with plugins
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone etherpad repository
+      uses: GuillaumeFalourd/clone-github-repo-action@v2.3
+      with:
+        depth: 1
+        branch: 'master'
+        owner: 'ether'
+        repository: 'etherpad-lite'
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - uses: JarvusInnovations/background-action@v1
+      name: Start etherpad service
+      with:
+        run: |
+          npm install --no-save --legacy-peer-deps ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown 
+          src/bin/run.sh &
+        wait-on: |
+          http://localhost:9001
+        tail: true
+        log-output-resume: stderr
+        wait-for: 5m
+        working-directory: backend
+
+    - name: Scan etherpad instance
+      uses: GuillaumeFalourd/assert-command-line-output@v2.2
+      with:
+        command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+        assert_file_path: tests/e2e/fixture/master_with_plugins.txt
+        expected_result: PASSED
+
   LatestEtherpad:
-    name: Latest etherpad with plugins
+    name: Latest etherpad
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -40,7 +74,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad ${{ matrix.version }} without plugins
+    name: Etherpad ${{ matrix.version }}
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -50,7 +84,7 @@ jobs:
 
     strategy:
       matrix:
-        version: ["1.9.7", "1.8.18", "1.8.0", "1.7.5"]
+        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
