@@ -7,7 +7,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # Add tests for polling etherpad instances (no websocket support)
   EtherpadWithNginxReverseProxy:
     name: Etherpad and nginx reverse proxy (no websocket)
     runs-on: ubuntu-latest
@@ -18,7 +17,7 @@ jobs:
       - name: docker network
         run: docker network create --subnet=172.23.42.0/16 test_net
 
-      - name: Start nginx
+      - name: Start docker containers
         run: |
           docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.9.0
           docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
@@ -35,14 +34,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Debug
-        run: docker ps
-
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: bin/console.php ether:scan http://localhost:8080
-          contains: "Package version: 1.9.0"
+          command_line: bin/console.php ether:scan http://localhost:8080 | grep -E "Package version|HTTP/1.1 400" | sed 's/ *$//'
+          assert_file_path: tests/e2e/fixture/reverse_proxy_no_websocket.txt
           expected_result: PASSED
 
   EtherpadWithPlugins:
