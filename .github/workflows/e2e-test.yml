@@ -19,7 +19,7 @@ jobs:
 
       - name: Start docker containers
         run: |
-          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.9.0
+          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.8.17
           docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
 
       - name: Cache Composer packages
