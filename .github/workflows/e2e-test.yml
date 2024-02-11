@@ -19,9 +19,9 @@ jobs:
       nginx:
         image: nginx:1.25
         ports:
-          - 8081:8080
-        #volumes:
-          #- ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf:ro
+          - 8080:80
+        volumes:
+          - ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
