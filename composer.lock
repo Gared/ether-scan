@@ -8,19 +8,20 @@
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.3.1",
+            "version": "v4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "b417a4af4d3f01ca62046d6a4794df592c8450b5"
+                "reference": "3ab310a62e170a20b0c7f1b1147633c7cead8178"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/b417a4af4d3f01ca62046d6a4794df592c8450b5",
-                "reference": "b417a4af4d3f01ca62046d6a4794df592c8450b5",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/3ab310a62e170a20b0c7f1b1147633c7cead8178",
+                "reference": "3ab310a62e170a20b0c7f1b1147633c7cead8178",
                 "shasum": ""
             },
             "require": {
+                "ext-mbstring": "*",
                 "php": ">=7.2",
                 "psr/log": "^1.1 || ^3.0"
             },
@@ -66,18 +67,19 @@
                     "role": "Contributors :)"
                 }
             ],
-            "description": "Send events to a real time websocket engine through PHP",
+            "description": "Send events to a socket.io server through PHP",
             "homepage": "https://elephantio.github.io/elephant.io/",
             "keywords": [
+                "Socket.io",
                 "dialog",
                 "nodejs",
                 "real time",
                 "websocket"
             ],
             "support": {
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.3.1"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.6.0"
             },
-            "time": "2023-11-06T06:49:37+00:00"
+            "time": "2024-02-07T13:10:08+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
