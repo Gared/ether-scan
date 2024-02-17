@@ -8,7 +8,7 @@ on:
 
 jobs:
   EtherpadWithNginxReverseProxy:
-    name: Etherpad and nginx reverse proxy (no websocket)
+    name: Etherpad docker "1.8.17" and nginx reverse proxy (no websocket)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadWithPlugins:
-    name: Etherpad with plugins
+    name: Etherpad "develop" with plugins
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
@@ -74,7 +74,7 @@ jobs:
         expected_result: PASSED
 
   LatestEtherpad:
-    name: Latest etherpad
+    name: Etherpad docker "latest"
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -106,7 +106,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad ${{ matrix.version }}
+    name: Etherpad docker "${{ matrix.version }}"
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -116,7 +116,7 @@ jobs:
 
     strategy:
       matrix:
-        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5"]
+        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5", "develop"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
