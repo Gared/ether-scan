@@ -166,12 +166,6 @@ class ScannerService
             $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $padId, $token);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
-
-            try {
-                $this->doSocketPolling($padId, $cookies, $token, $callback);
-            } catch (Exception $e) {
-                $callback->onScanPadException($e);
-            }
         }
     }
 
