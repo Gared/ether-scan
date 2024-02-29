@@ -4,23 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3636363256c15cc8ce2b2b33b09e74d1",
+    "content-hash": "b106d86036b3d5c5f1d0fd62b9374a56",
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "b417a4af4d3f01ca62046d6a4794df592c8450b5"
+                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/b417a4af4d3f01ca62046d6a4794df592c8450b5",
-                "reference": "b417a4af4d3f01ca62046d6a4794df592c8450b5",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/ac2e107353cab22cb864b406aa6718163258f3c7",
+                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7",
                 "shasum": ""
             },
             "require": {
+                "ext-mbstring": "*",
                 "php": ">=7.2",
                 "psr/log": "^1.1 || ^3.0"
             },
@@ -75,9 +76,9 @@
                 "websocket"
             ],
             "support": {
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.3.1"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.3.2"
             },
-            "time": "2023-11-06T06:49:37+00:00"
+            "time": "2024-01-29T02:54:29+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
