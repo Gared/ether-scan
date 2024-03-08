@@ -231,13 +231,15 @@ class ScannerService
             return;
         }
 
+        $this->versionRanges = array_filter($this->versionRanges);
+
+        if (count($this->versionRanges) === 0) {
+            throw new EtherpadServiceNotFoundException('No version information found');
+        }
+
         $maxVersion = null;
         $minVersion = null;
         foreach ($this->versionRanges as $version) {
-            if ($version === null) {
-                continue;
-            }
-
             if ($maxVersion === null || version_compare($version->getMaxVersion() ?? '', $maxVersion, '<')) {
                 $maxVersion = $version->getMaxVersion();
             }
@@ -307,7 +309,11 @@ class ScannerService
             $this->packageVersion = '1.4.0';
             throw new Exception('Socket.io 1 not supported');
         }
-        $body = substr($body, strpos($body, '{'));
+        $curlyBracketPos = strpos($body, '{');
+        if ($curlyBracketPos === false) {
+            throw new Exception('No JSON response: ' . $body);
+        }
+        $body = substr($body, $curlyBracketPos);
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         $sid = $data['sid'];
 
