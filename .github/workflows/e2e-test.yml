@@ -62,7 +62,9 @@ jobs:
         wait-on: |
           http://localhost:9001
         tail: true
+        log-output: true
         log-output-resume: stderr
+        log-output-if: failure
         wait-for: 5m
         working-directory: etherpad
 
