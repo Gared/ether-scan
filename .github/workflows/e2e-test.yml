@@ -58,8 +58,9 @@ jobs:
       with:
         run: |
           npm install pnpm -g
+          bin/installDeps.sh
           pnpm run install-plugins ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
-          src/bin/run.sh &
+          bin/run.sh &
         wait-on: |
           http://localhost:9001
         log-output-if: failure
