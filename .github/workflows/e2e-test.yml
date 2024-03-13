@@ -57,7 +57,7 @@ jobs:
       name: Start etherpad service
       with:
         run: |
-          npm run install-plugins --prefix ./src ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
+          pnpm run install-plugins ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
           src/bin/run.sh &
         wait-on: |
           http://localhost:9001
