@@ -67,6 +67,21 @@ jobs:
         wait-for: 5m
         working-directory: etherpad
 
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
     - name: Scan etherpad instance
       uses: GuillaumeFalourd/assert-command-line-output@v2.2
       with:
