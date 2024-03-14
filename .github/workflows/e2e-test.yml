@@ -69,6 +69,8 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        path: app
 
     - name: Cache Composer packages
       id: composer-cache
@@ -81,11 +83,12 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
+      working-directory: ./app
 
     - name: Scan etherpad instance
       uses: GuillaumeFalourd/assert-command-line-output@v2.2
       with:
-        command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+        command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
         assert_file_path: tests/e2e/fixture/master_with_plugins.txt
         expected_result: PASSED
 
