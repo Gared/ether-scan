@@ -8,6 +8,7 @@ use ElephantIO\Yeast;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
+use Gared\EtherScan\Model\VersionRange;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
@@ -69,7 +70,7 @@ class ScannerService
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
         $this->scanHealth($callback);
-        $this->calculateVersion($callback);
+        $this->progressVersionRanges($callback);
         $this->scanStats($callback);
         $this->scanAdmin($callback);
         $this->scanPlugins($callback);
@@ -151,9 +152,13 @@ class ScannerService
             $callback->onScanPadException($e);
         }
 
+        $versionRange = $this->calculateVersion();
+
         $socketIoVersion = ElephantClient::CLIENT_2X;
         if (version_compare($this->apiVersion ?? '999', '1.2.13', '<=')) {
             $socketIoVersion = ElephantClient::CLIENT_1X;
+        } else if (version_compare($versionRange->getMinVersion(), '2.0.0', '>=')) {
+            $socketIoVersion = ElephantClient::CLIENT_3X;
         }
 
         $cookieString = '';
@@ -214,27 +219,35 @@ class ScannerService
         $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad_utils.js', $hash);
     }
 
-    private function calculateVersion(ScannerServiceCallbackInterface $callback): void
+    private function progressVersionRanges(ScannerServiceCallbackInterface $callback): void
+    {
+        $versionRange = $this->calculateVersion();
+
+        if ($versionRange === null) {
+            throw new EtherpadServiceNotFoundException('No version information found');
+        }
+
+        $callback->onVersionResult($versionRange->getMinVersion(), $versionRange->getMaxVersion());
+    }
+
+    private function calculateVersion(): ?VersionRange
     {
         if ($this->packageVersion !== null) {
-            $callback->onVersionResult($this->packageVersion, $this->packageVersion);
-            return;
+            return new VersionRange($this->packageVersion, $this->packageVersion);
         }
 
         if ($this->healthVersion !== null) {
-            $callback->onVersionResult($this->healthVersion, $this->healthVersion);
-            return;
+            return new VersionRange($this->healthVersion, $this->healthVersion);
         }
 
         if ($this->revisionVersion !== null) {
-            $callback->onVersionResult($this->revisionVersion, $this->revisionVersion);
-            return;
+            return new VersionRange($this->revisionVersion, $this->revisionVersion);
         }
 
         $this->versionRanges = array_filter($this->versionRanges);
 
         if (count($this->versionRanges) === 0) {
-            throw new EtherpadServiceNotFoundException('No version information found');
+            return null;
         }
 
         $maxVersion = null;
@@ -249,7 +262,7 @@ class ScannerService
             }
         }
 
-        $callback->onVersionResult($minVersion, $maxVersion);
+        return new VersionRange($minVersion, $maxVersion);
     }
 
     private function getFileHash(string $path): ?string
