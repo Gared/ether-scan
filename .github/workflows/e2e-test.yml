@@ -129,16 +129,22 @@ jobs:
     runs-on: ubuntu-latest
     services:
       etherpad:
-        image: etherpad/etherpad:${{ matrix.version }}
+        image: etherpad/etherpad:${{ matrix.versions.tag }}
         ports:
           - 9001:9001
 
     strategy:
       matrix:
-        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5", "develop"]
+        versions: [
+          {tag: "1.9.0", expected: "1.9.0"},
+          {tag: "1.8.18", expected: "1.8.18"},
+          {tag: "1.8.0", expected: "1.8.0"},
+          {tag: "1.7.5", expected: "1.7.5"},
+          {tag: "develop", expected: "1.9.7"}
+        ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4,
 
       - name: Cache Composer packages
         id: composer-cache
@@ -156,5 +162,5 @@ jobs:
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
-          contains: "Package version: ${{ matrix.version }}"
+          contains: "Package version: ${{ matrix.versions.expected }}"
           expected_result: PASSED
