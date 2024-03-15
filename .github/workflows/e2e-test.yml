@@ -125,7 +125,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad docker "${{ matrix.version }}"
+    name: Etherpad docker "${{ matrix.versions.tag }}"
     runs-on: ubuntu-latest
     services:
       etherpad:
