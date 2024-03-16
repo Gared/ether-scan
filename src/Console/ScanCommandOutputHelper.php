@@ -72,6 +72,8 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             return;
         }
 
+        $this->symfonyStyle->writeln('Plugins:');
+
         $pluginNames = array_keys($plugins);
         sort($pluginNames);
 
