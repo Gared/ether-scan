@@ -100,7 +100,19 @@ class ScannerService
 
             $pathParts = explode('/', $uri->getPath());
             if (count($pathParts) === 1) {
-                throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                try {
+                    $uriApi = $uri->withPath($uri->getPath() . '/api');
+                    $response = $this->client->get($uriApi->__toString());
+                    $body = (string)$response->getBody();
+                    $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+                    if (array_key_exists('currentVersion', $data) === false) {
+                        throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                    }
+                    $this->baseUrl = $uri->__toString() . '/';
+                    return;
+                } catch (Exception) {
+                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                }
             }
             unset($pathParts[count($pathParts) - 1]);
             $uri = $uri->withPath(implode('/', $pathParts));
@@ -172,12 +184,9 @@ class ScannerService
         $callback->onScanPadStart();
         $cookies = new CookieJar();
         try {
-            $response = $this->client->get($this->baseUrl . 'p/' . $this->padId, [
+            $this->client->get($this->baseUrl . 'p/' . $this->padId, [
                 'cookies' => $cookies,
             ]);
-            if ($response->getStatusCode() !== 200) {
-                throw new EtherpadServiceNotFoundException('Etherpad service not found');
-            }
         } catch (GuzzleException $e) {
             $callback->onScanPadException($e);
         }
