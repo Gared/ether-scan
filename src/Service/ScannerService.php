@@ -182,20 +182,17 @@ class ScannerService
 
     private function getAdmin(string $user, string $password, ScannerServiceCallbackInterface $callback): void
     {
-        $versionRange = $this->calculateVersion();
-
         try {
-            if (version_compare($versionRange->getMinVersion(), '2.0.0', '>=')) {
-                $this->client->post('/admin-auth/', [
-                    'auth' => [$user, $password],
-                ]);
-            } else {
-                $this->client->get('/admin', [
+            $response = $this->client->get('/admin', [
+                'auth' => [$user, $password],
+            ]);
+            if ($response->getStatusCode() === 301) {
+                $response = $this->client->post('/admin-auth/', [
                     'auth' => [$user, $password],
                 ]);
             }
 
-            $callback->onScanAdminResult($user, $password, true);
+            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200);
         } catch (GuzzleException) {
             $callback->onScanAdminResult($user, $password, false);
         }
