@@ -32,9 +32,9 @@ Starting scan of plugins...
 
 Plugins:
  * ep_align
- * ep_headings2
- * ep_table_of_contents
  * ep_font_size
- * ep_spellcheck
+ * ep_headings2
  * ep_markdown
+ * ep_spellcheck
+ * ep_table_of_contents
 

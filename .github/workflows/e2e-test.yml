@@ -8,7 +8,7 @@ on:
 
 jobs:
   EtherpadWithNginxReverseProxy:
-    name: Etherpad and nginx reverse proxy (no websocket)
+    name: Etherpad docker "1.8.17" and nginx reverse proxy (no websocket)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadWithPlugins:
-    name: Etherpad with plugins
+    name: Etherpad "develop" with plugins
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
@@ -57,24 +57,43 @@ jobs:
       name: Start etherpad service
       with:
         run: |
-          npm install --no-save --legacy-peer-deps ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown 
-          src/bin/run.sh &
+          npm install pnpm -g
+          bin/installDeps.sh
+          pnpm run install-plugins ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
+          bin/run.sh &
         wait-on: |
           http://localhost:9001
-        tail: true
-        log-output-resume: stderr
+        log-output-if: failure
         wait-for: 5m
         working-directory: etherpad
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: app
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+      working-directory: ./app
 
     - name: Scan etherpad instance
       uses: GuillaumeFalourd/assert-command-line-output@v2.2
       with:
-        command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
-        assert_file_path: tests/e2e/fixture/master_with_plugins.txt
+        command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+        assert_file_path: app/tests/e2e/fixture/master_with_plugins.txt
         expected_result: PASSED
 
   LatestEtherpad:
-    name: Latest etherpad
+    name: Etherpad docker "latest"
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -106,17 +125,23 @@ jobs:
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad ${{ matrix.version }}
+    name: Etherpad docker "${{ matrix.versions.tag }}"
     runs-on: ubuntu-latest
     services:
       etherpad:
-        image: etherpad/etherpad:${{ matrix.version }}
+        image: etherpad/etherpad:${{ matrix.versions.tag }}
         ports:
           - 9001:9001
 
     strategy:
       matrix:
-        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5"]
+        versions: [
+          {tag: "1.9.0", expected: "1.9.0"},
+          {tag: "1.8.18", expected: "1.8.18"},
+          {tag: "1.8.0", expected: "1.8.0"},
+          {tag: "1.7.5", expected: "1.7.5"},
+          {tag: "develop", expected: "1.9.7"}
+        ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -137,5 +162,5 @@ jobs:
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
-          contains: "Package version: ${{ matrix.version }}"
+          contains: "Package version: ${{ matrix.versions.expected }}"
           expected_result: PASSED
