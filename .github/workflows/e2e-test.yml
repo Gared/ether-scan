@@ -71,7 +71,7 @@ jobs:
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: bin/console.php ether:scan http://localhost:8080/
+          command_line: bin/console.php ether:scan http://localhost:8080/etherpad
           contains: "Package version: 1.8.18"
           expected_result: PASSED
 
