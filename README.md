@@ -1,6 +1,20 @@
 # Etherscan (an etherpad scanner)
 
-Use this tool to scan your [etherpad](https://etherpad.org) instance to get some insights.
+Use this tool to scan your [etherpad](https://etherpad.org) instance to get some insights and test if there is any misconfiguration.
+
+What is this tool doing?
+* Check the "Server" header to see if the revision of etherpad is returned
+* Check the API version (pad.example.com/api)
+* Check the etherpad version
+* Check if the pads are publicly accessible
+* Check if the server is healthy (pad.example.com/health)
+* Check if the admin area is accessible with default credentials (pad.example.com/admin)
+* Check if any (frontend) plugins are installed
+* Check if the server is running since a long time (pad.example.com/stats)
+
+## Try it out
+
+You can try this tool out on the https://scanner.etherpad.org which is using this library.
 
 ## Requirements
 
