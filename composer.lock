@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b106d86036b3d5c5f1d0fd62b9374a56",
+    "content-hash": "2807e0e82dd6da697011867516c75aa2",
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.3.2",
+            "version": "v4.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7"
+                "reference": "4b2f8f044c815c6c5b7c989cc2e18a370718e55f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/ac2e107353cab22cb864b406aa6718163258f3c7",
-                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/4b2f8f044c815c6c5b7c989cc2e18a370718e55f",
+                "reference": "4b2f8f044c815c6c5b7c989cc2e18a370718e55f",
                 "shasum": ""
             },
             "require": {
@@ -67,18 +67,19 @@
                     "role": "Contributors :)"
                 }
             ],
-            "description": "Send events to a real time websocket engine through PHP",
+            "description": "Send events to a socket.io server through PHP",
             "homepage": "https://elephantio.github.io/elephant.io/",
             "keywords": [
+                "Socket.io",
                 "dialog",
                 "nodejs",
                 "real time",
                 "websocket"
             ],
             "support": {
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.3.2"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.7.0"
             },
-            "time": "2024-01-29T02:54:29+00:00"
+            "time": "2024-02-16T19:40:38+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
