@@ -9,7 +9,7 @@ Starting scan of api...
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 1.9.7
+ [INFO] Package version: 2.0.0
 
  [OK] Pads are publicly accessible
 
