@@ -14,6 +14,7 @@ use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use JsonException;
@@ -24,14 +25,15 @@ class ScannerService
     private readonly ApiVersionLookupService $versionLookup;
     private readonly GithubApi $githubApi;
     private readonly Client $client;
-    private readonly string $url;
     private readonly FileHashLookupService $fileHashLookup;
     private readonly RevisionLookupService $revisionLookup;
+    private string $baseUrl;
     private array $versionRanges;
     private ?string $apiVersion = null;
     private ?string $packageVersion = null;
     private ?string $revisionVersion = null;
     private ?string $healthVersion = null;
+    private string $padId;
 
     public function __construct(
         string $url
@@ -40,10 +42,9 @@ class ScannerService
         $stack->push(Middleware::httpErrors(), 'http_errors');
         $stack->push(Middleware::cookies(), 'cookies');
 
-        $this->url = $url;
+        $this->baseUrl = $url;
 
         $this->client = new Client([
-            'base_uri' => $url,
             'timeout' => 2.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
@@ -65,7 +66,9 @@ class ScannerService
     public function scan(ScannerServiceCallbackInterface $callback): void
     {
         $this->versionRanges = [];
+        $this->padId = 'test' . rand(1, 99999);
 
+        $this->scanBaseUrl($callback);
         $this->scanApi($callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
@@ -76,11 +79,51 @@ class ScannerService
         $this->scanPlugins($callback);
     }
 
+    private function scanBaseUrl(ScannerServiceCallbackInterface $callback): void
+    {
+        $uri = (new Uri($this->baseUrl))
+            ->withFragment('')
+            ->withQuery('');
+
+        while (true) {
+            try {
+                $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
+                $response = $this->client->get($uriWithPad->__toString());
+                $body = (string) $response->getBody();
+                $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, 'ep_etherpad-lite');
+                if ($isEtherpad) {
+                    $this->baseUrl = $uri->__toString() . '/';
+                    return;
+                }
+            } catch (GuzzleException) {
+            }
+
+            $pathParts = explode('/', $uri->getPath());
+            if (count($pathParts) === 1) {
+                try {
+                    $uriApi = $uri->withPath($uri->getPath() . '/api');
+                    $response = $this->client->get($uriApi->__toString());
+                    $body = (string)$response->getBody();
+                    $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+                    if (array_key_exists('currentVersion', $data) === false) {
+                        throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                    }
+                    $this->baseUrl = $uri->__toString() . '/';
+                    return;
+                } catch (Exception) {
+                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                }
+            }
+            unset($pathParts[count($pathParts) - 1]);
+            $uri = $uri->withPath(implode('/', $pathParts));
+        }
+    }
+
     private function scanApi(ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanApiStart();
         try {
-            $response = $this->client->get('/api');
+            $response = $this->client->get($this->baseUrl . 'api');
             $callback->onScanApiResponse($response);
 
             $revision = $this->getRevisionFromHeaders($response);
@@ -115,7 +158,7 @@ class ScannerService
     {
         $callback->onScanPluginsStart();
         try {
-            $response = $this->client->get('/pluginfw/plugin-definitions.json');
+            $response = $this->client->get($this->baseUrl . 'pluginfw/plugin-definitions.json');
             $body = (string) $response->getBody();
             $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             $callback->onScanPluginsList($data['plugins']);
@@ -137,17 +180,12 @@ class ScannerService
      */
     private function scanPad(ScannerServiceCallbackInterface $callback): void
     {
-        $padId = 'test' . rand(1, 99999);
-
         $callback->onScanPadStart();
         $cookies = new CookieJar();
         try {
-            $response = $this->client->get('/p/' . $padId, [
+            $this->client->get($this->baseUrl . 'p/' . $this->padId, [
                 'cookies' => $cookies,
             ]);
-            if ($response->getStatusCode() !== 200) {
-                throw new EtherpadServiceNotFoundException('Etherpad service not found');
-            }
         } catch (GuzzleException $e) {
             $callback->onScanPadException($e);
         }
@@ -157,8 +195,8 @@ class ScannerService
         $socketIoVersion = ElephantClient::CLIENT_2X;
         if (version_compare($this->apiVersion ?? '999', '1.2.13', '<=')) {
             $socketIoVersion = ElephantClient::CLIENT_1X;
-        } else if (version_compare($versionRange->getMinVersion(), '2.0.0', '>=')) {
-            $socketIoVersion = ElephantClient::CLIENT_3X;
+        } else if (version_compare($versionRange->getMinVersion() ?? '0.1', '2.0.0', '>=')) {
+            $socketIoVersion = ElephantClient::CLIENT_4X;
         }
 
         $cookieString = '';
@@ -168,12 +206,12 @@ class ScannerService
         $token = 't.vbWE289T3YggPgRVvvuP';
 
         try {
-            $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $padId, $token);
+            $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $token);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
 
             try {
-                $this->doSocketPolling($padId, $cookies, $token, $callback);
+                $this->doSocketPolling($cookies, $token, $callback);
             } catch (Exception $e) {
                 $callback->onScanPadException($e);
             }
@@ -183,11 +221,11 @@ class ScannerService
     private function getAdmin(string $user, string $password, ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $this->client->get('/admin', [
+            $response = $this->client->get($this->baseUrl . 'admin', [
                 'auth' => [$user, $password],
             ]);
             if ($response->getStatusCode() === 301) {
-                $response = $this->client->post('/admin-auth/', [
+                $response = $this->client->post($this->baseUrl . 'admin-auth/', [
                     'auth' => [$user, $password],
                 ]);
             }
@@ -273,7 +311,7 @@ class ScannerService
     private function getFileHash(string $path): ?string
     {
         try {
-            $response = $this->client->get($path);
+            $response = $this->client->get($this->baseUrl . $path);
             $body = (string) $response->getBody();
             return hash('md5', $body);
         } catch (GuzzleException) {
@@ -285,7 +323,7 @@ class ScannerService
     private function scanStats(ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $this->client->get('/stats');
+            $response = $this->client->get($this->baseUrl . 'stats');
             $callback->onStatsResult(json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR));
         } catch (GuzzleException|JsonException $e) {
             $callback->onStatsException($e);
@@ -295,7 +333,7 @@ class ScannerService
     private function scanHealth(ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $this->client->get('/health');
+            $response = $this->client->get($this->baseUrl . 'health');
             $healthData = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
             $callback->onHealthResult($healthData);
             $this->healthVersion = $healthData['releaseId'];
@@ -305,20 +343,19 @@ class ScannerService
     }
 
     private function doSocketPolling(
-        string $padId,
         CookieJar $cookies,
         string $token,
         ScannerServiceCallbackInterface $callback
     ): void {
         $queryParameters = [
-            'padId' => $padId,
+            'padId' => $this->padId,
             'EIO' => 3,
             'transport' => 'polling',
             't' => Yeast::yeast(),
             'b64' => 1,
         ];
 
-        $response = $this->client->get('/socket.io/', [
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
             'query' => $queryParameters,
             'cookies' => $cookies,
         ]);
@@ -338,7 +375,7 @@ class ScannerService
         $queryParameters['sid'] = $sid;
         $queryParameters['t'] = Yeast::yeast();
 
-        $response = $this->client->get('/socket.io/', [
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
             'query' => $queryParameters,
             'cookies' => $cookies,
         ]);
@@ -352,7 +389,7 @@ class ScannerService
             [
                 'component' => 'pad',
                 'type' => 'CLIENT_READY',
-                'padId' => $padId,
+                'padId' => $this->padId,
                 'sessionID' => 'null',
                 'token' => $token,
                 'password' => null,
@@ -361,7 +398,7 @@ class ScannerService
         ]);
 
         $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->post('/socket.io/', [
+        $response = $this->client->post($this->baseUrl . 'socket.io/', [
             'query' => $queryParameters,
             'body' => (mb_strlen($postData) + 2) . ':42' . $postData,
             'cookies' => $cookies,
@@ -372,7 +409,7 @@ class ScannerService
         }
 
         $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->get('/socket.io/', [
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
             'query' => $queryParameters,
             'cookies' => $cookies,
         ]);
@@ -396,10 +433,9 @@ class ScannerService
         int $socketIoVersion,
         string $cookieString,
         ScannerServiceCallbackInterface $callback,
-        string $padId,
         string $token
     ): void {
-        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->url . '/socket.io/', [
+        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->baseUrl . 'socket.io/', [
             'persistent' => false,
             'context' => [
                 'ssl' => [
@@ -417,7 +453,7 @@ class ScannerService
         $socketIoClient->emit('message', [
             'component' => 'pad',
             'type' => 'CLIENT_READY',
-            'padId' => $padId,
+            'padId' => $this->padId,
             'sessionID' => 'null',
             'token' => $token,
             'password' => null,
@@ -449,5 +485,10 @@ class ScannerService
         }
 
         $socketIoClient->close();
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
     }
 }
