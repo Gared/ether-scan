@@ -117,7 +117,6 @@ class ScannerService
             unset($pathParts[count($pathParts) - 1]);
             $uri = $uri->withPath(implode('/', $pathParts));
         }
-
     }
 
     private function scanApi(ScannerServiceCallbackInterface $callback): void
