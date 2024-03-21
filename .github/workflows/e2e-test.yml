@@ -122,7 +122,7 @@ jobs:
     - name: Scan etherpad instance
       uses: GuillaumeFalourd/assert-command-line-output@v2.2
       with:
-        command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
+        command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -vE "(Version is|Package version)" | grep -v "Server running since"
         assert_file_path: app/tests/e2e/fixture/master_with_plugins.txt
         expected_result: PASSED
 

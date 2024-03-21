@@ -9,13 +9,11 @@ Starting scan of api...
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 2.0.0
 
  [OK] Pads are publicly accessible
 
  [OK] Server is healthy
 
- [INFO] Version is 2.0.0
 
 
 Starting scan of admin area...
