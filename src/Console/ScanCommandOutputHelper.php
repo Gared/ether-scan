@@ -60,11 +60,6 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->info($text);
     }
 
-    public function onScanPluginsStart(): void
-    {
-        $this->symfonyStyle->title('Starting scan of plugins...');
-    }
-
     public function onScanPluginsList(array $plugins): void
     {
         if (count($plugins) === 0) {
@@ -74,15 +69,13 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
         $this->symfonyStyle->writeln('Plugins:');
 
-        $pluginNames = array_keys($plugins);
-        sort($pluginNames);
+        $pluginData = [];
+        foreach ($plugins as $pluginName => $plugin) {
+            $pluginData[] = $pluginName . '@' . $plugin['package']['version'];
+        }
+        sort($pluginData);
 
-        $this->symfonyStyle->listing($pluginNames);
-    }
-
-    public function onScanPluginsException(Exception $e): void
-    {
-        $this->symfonyStyle->error($e->getMessage());
+        $this->symfonyStyle->listing($pluginData);
     }
 
     public function onStatsResult(array $data): void
