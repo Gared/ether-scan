@@ -11,9 +11,9 @@ Starting scan of a pad...
 
  [INFO] Package version: 2.0.1
 
- [OK] Pads are publicly accessible
-
  [INFO] No plugins found
+
+ [OK] Pads are publicly accessible
 
  [OK] Server is healthy
 
