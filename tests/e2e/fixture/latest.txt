@@ -11,6 +11,8 @@ Starting scan of a pad...
 
  [INFO] Package version: 2.0.1
 
+ [INFO] No plugins found
+
  [OK] Pads are publicly accessible
 
  [OK] Server is healthy
@@ -26,9 +28,4 @@ Starting scan of admin area...
  [OK] Admin area is not accessible with admin / changeme1
 
  [OK] Admin area is not accessible with user / changeme1
-
-Starting scan of plugins...
-===========================
-
- [INFO] No plugins found
 

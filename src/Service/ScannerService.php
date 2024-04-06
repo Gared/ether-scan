@@ -78,7 +78,6 @@ class ScannerService
         $this->progressVersionRanges($callback);
         $this->scanStats($callback);
         $this->scanAdmin($callback);
-        $this->scanPlugins($callback);
     }
 
     private function scanBaseUrl(ScannerServiceCallbackInterface $callback): void
@@ -171,19 +170,6 @@ class ScannerService
             }
         } catch (GuzzleException $e) {
             $callback->onScanApiException($e);
-        }
-    }
-
-    private function scanPlugins(ScannerServiceCallbackInterface $callback): void
-    {
-        $callback->onScanPluginsStart();
-        try {
-            $response = $this->client->get($this->baseUrl . 'pluginfw/plugin-definitions.json');
-            $body = (string) $response->getBody();
-            $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            $callback->onScanPluginsList($data['plugins']);
-        } catch (Exception $e) {
-            $callback->onScanPluginsException($e);
         }
     }
 
@@ -444,8 +430,12 @@ class ScannerService
         }
 
         $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+        $onlyPlugins = $data['data']['plugins']['plugins'];
+        unset($onlyPlugins['ep_etherpad-lite']);
+
         $this->packageVersion = $version;
         $callback->onClientVars($version, $data);
+        $callback->onScanPluginsList($onlyPlugins);
         $callback->onScanPadSuccess();
     }
 
@@ -497,8 +487,12 @@ class ScannerService
                 }
 
                 $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
+                $onlyPlugins = $data['data']['plugins']['plugins'];
+                unset($onlyPlugins['ep_etherpad-lite']);
+
                 $this->packageVersion = $version;
                 $callback->onClientVars($version, $result->data);
+                $callback->onScanPluginsList($onlyPlugins);
                 $callback->onScanPadSuccess();
                 break;
             }

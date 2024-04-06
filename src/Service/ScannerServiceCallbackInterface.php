@@ -24,11 +24,7 @@ interface ScannerServiceCallbackInterface
 
     public function onScanApiVersion(string $apiVersion): void;
 
-    public function onScanPluginsStart(): void;
-
     public function onScanPluginsList(array $plugins): void;
-
-    public function onScanPluginsException(Exception $e): void;
 
     public function onStatsResult(array $data): void;
 
