@@ -19,6 +19,7 @@ use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 class ScannerService
 {
@@ -28,6 +29,7 @@ class ScannerService
     private readonly FileHashLookupService $fileHashLookup;
     private readonly RevisionLookupService $revisionLookup;
     private string $baseUrl;
+    private ?string $pathPrefix = null;
     private array $versionRanges;
     private ?string $apiVersion = null;
     private ?string $packageVersion = null;
@@ -86,16 +88,19 @@ class ScannerService
             ->withQuery('');
 
         while (true) {
-            try {
-                $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
-                $response = $this->client->get($uriWithPad->__toString());
-                $body = (string) $response->getBody();
-                $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, 'ep_etherpad-lite');
-                if ($isEtherpad) {
-                    $this->baseUrl = $uri->__toString() . '/';
-                    return;
-                }
-            } catch (GuzzleException) {
+            $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
+            $result = $this->scanForPath($uriWithPad);
+            if ($result) {
+                $this->baseUrl = $uri->__toString() . '/';
+                $this->pathPrefix = 'p/';
+                return;
+            }
+
+            $uriWithPad = $uri->withPath($uri->getPath() . '/' . $this->padId);
+            $result = $this->scanForPath($uriWithPad);
+            if ($result) {
+                $this->baseUrl = $uri->__toString() . '/';
+                return;
             }
 
             $pathParts = explode('/', $uri->getPath());
@@ -117,6 +122,21 @@ class ScannerService
             unset($pathParts[count($pathParts) - 1]);
             $uri = $uri->withPath(implode('/', $pathParts));
         }
+    }
+
+    private function scanForPath(UriInterface $uri): bool
+    {
+        try {
+            $response = $this->client->get($uri->__toString());
+            $body = (string) $response->getBody();
+            $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, 'ep_etherpad-lite');
+            if ($isEtherpad) {
+                return true;
+            }
+        } catch (GuzzleException) {
+        }
+
+        return false;
     }
 
     private function scanApi(ScannerServiceCallbackInterface $callback): void
@@ -183,7 +203,7 @@ class ScannerService
         $callback->onScanPadStart();
         $cookies = new CookieJar();
         try {
-            $this->client->get($this->baseUrl . 'p/' . $this->padId, [
+            $this->client->get($this->baseUrl . $this->pathPrefix . $this->padId, [
                 'cookies' => $cookies,
             ]);
         } catch (GuzzleException $e) {
