@@ -13,6 +13,8 @@ Starting scan of a pad...
 
  [OK] Pads are publicly accessible
 
+ [INFO] No plugins found
+
  [OK] Server is healthy
 
  [INFO] Version is 2.0.1
@@ -29,6 +31,4 @@ Starting scan of admin area...
 
 Starting scan of plugins...
 ===========================
-
- [INFO] No plugins found
 

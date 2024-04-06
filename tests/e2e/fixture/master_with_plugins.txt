@@ -9,6 +9,13 @@ Starting scan of api...
 Starting scan of a pad...
 =========================
 
+Plugins:
+ * ep_align
+ * ep_font_size
+ * ep_headings2
+ * ep_markdown
+ * ep_spellcheck
+ * ep_table_of_contents
 
  [OK] Pads are publicly accessible
 
@@ -27,12 +34,4 @@ Starting scan of admin area...
 
 Starting scan of plugins...
 ===========================
-
-Plugins:
- * ep_align
- * ep_font_size
- * ep_headings2
- * ep_markdown
- * ep_spellcheck
- * ep_table_of_contents
 
