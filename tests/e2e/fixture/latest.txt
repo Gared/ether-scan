@@ -29,6 +29,3 @@ Starting scan of admin area...
 
  [OK] Admin area is not accessible with user / changeme1
 
-Starting scan of plugins...
-===========================
-
