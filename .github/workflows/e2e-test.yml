@@ -41,6 +41,40 @@ jobs:
           assert_file_path: tests/e2e/fixture/reverse_proxy_no_websocket.txt
           expected_result: PASSED
 
+  Etherpad2WithNginxReverseProxy:
+    name: Etherpad docker "2.0.2" and nginx reverse proxy (no websocket)
+    runs-on: ubuntu-latest
+    steps:
+      -   name: Checkout repository
+          uses: actions/checkout@v4
+
+      -   name: docker network
+          run: docker network create --subnet=172.23.42.0/16 test_net
+
+      -   name: Start docker containers
+          run: |
+            docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:2.0.2
+            docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
+
+      -   name: Cache Composer packages
+          id: composer-cache
+          uses: actions/cache@v4
+          with:
+            path: vendor
+            key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-php-
+
+      -   name: Install dependencies
+          run: composer install --prefer-dist --no-progress --no-dev
+
+      -   name: Scan etherpad instance
+          uses: GuillaumeFalourd/assert-command-line-output@v2.3
+          with:
+            command_line: bin/console.php ether:scan http://localhost:8080
+            contains: "Package version: 2.0.2"
+            expected_result: PASSED
+
   EtherpadWithNginxReverseProxyInSubPath:
     name: Etherpad docker "1.8.18" and nginx reverse proxy with subpath
     runs-on: ubuntu-latest
