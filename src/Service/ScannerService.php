@@ -50,7 +50,7 @@ class ScannerService
             'timeout' => 2.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/3.0.0',
+                'User-Agent' => 'EtherpadScanner/3.1.1',
             ],
             'handler' => $stack,
             'verify' => false,
@@ -217,7 +217,12 @@ class ScannerService
             $callback->onScanPadException($e);
 
             try {
-                $this->doSocketPolling($cookies, $token, $callback);
+                if ($socketIoVersion === ElephantClient::CLIENT_4X) {
+                    $this->doSocketPolling4($cookies, $token, $callback);
+                    return;
+                }
+
+                $this->doSocketPolling($socketIoVersion, $cookies, $token, $callback);
             } catch (Exception $e) {
                 $callback->onScanPadException($e);
             }
@@ -349,13 +354,16 @@ class ScannerService
     }
 
     private function doSocketPolling(
+        int $socketIoVersion,
         CookieJar $cookies,
         string $token,
         ScannerServiceCallbackInterface $callback
     ): void {
+        $engine = ElephantClient::engine($socketIoVersion, '');
+
         $queryParameters = [
             'padId' => $this->padId,
-            'EIO' => 3,
+            'EIO' => $engine->getOptions()['version'],
             'transport' => 'polling',
             't' => Yeast::yeast(),
             'b64' => 1,
@@ -419,6 +427,97 @@ class ScannerService
             'query' => $queryParameters,
             'cookies' => $cookies,
         ]);
+        $this->handleClientVarsResponse($response, $callback);
+    }
+
+    private function doSocketPolling4(
+        CookieJar $cookies,
+        string $token,
+        ScannerServiceCallbackInterface $callback
+    ): void {
+        $queryParameters = [
+            'padId' => $this->padId,
+            'EIO' => 4,
+            'transport' => 'polling',
+            't' => Yeast::yeast(),
+            'b64' => 1,
+        ];
+
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        $curlyBracketPos = strpos($body, '{');
+        if ($curlyBracketPos === false) {
+            throw new Exception('No JSON response: ' . $body);
+        }
+        $body = substr($body, $curlyBracketPos);
+        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        $sid = $data['sid'];
+
+        $queryParameters['sid'] = $sid;
+        $queryParameters['t'] = Yeast::yeast();
+
+        $response = $this->client->post($this->baseUrl . 'socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+            'body' => '40',
+        ]);
+        $body = (string)$response->getBody();
+        if ($body !== 'ok') {
+            throw new Exception('Invalid response: ' . $body);
+        }
+
+        $queryParameters['t'] = Yeast::yeast();
+
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+
+        if (str_starts_with($body, '40') === false) {
+            throw new Exception('Invalid response: ' . $body);
+        }
+
+        $postData = json_encode([
+            'message',
+            [
+                'component' => 'pad',
+                'type' => 'CLIENT_READY',
+                'padId' => $this->padId,
+                'sessionID' => 'null',
+                'token' => $token,
+                'password' => null,
+                'protocolVersion' => 2,
+            ]
+        ]);
+
+        $queryParameters['t'] = Yeast::yeast();
+        $response = $this->client->post($this->baseUrl . 'socket.io/', [
+            'query' => $queryParameters,
+            'body' => '42' . $postData,
+            'cookies' => $cookies,
+        ]);
+        $body = (string)$response->getBody();
+        if ($body !== 'ok') {
+            throw new Exception('Invalid response: ' . $body);
+        }
+
+        $queryParameters['t'] = Yeast::yeast();
+        $response = $this->client->get($this->baseUrl . 'socket.io/', [
+            'query' => $queryParameters,
+            'cookies' => $cookies,
+        ]);
+        $this->handleClientVarsResponse($response, $callback);
+    }
+
+    private function handleClientVarsResponse(
+        ResponseInterface $response,
+        ScannerServiceCallbackInterface $callback,
+    ): void
+    {
         $body = (string)$response->getBody();
         $body = substr($body, strpos($body, '['));
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
