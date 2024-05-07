@@ -22,6 +22,13 @@ You need PHP 8.1 or higher to run this tool.
 
 ## Usage
 
+### Docker
+
+Directly download and run this docker image to scan your instance
+```bash
+docker run --rm gared/ether-scan:main bin/console.php ether:scan http://localhost:9001
+```
+
 ### Clone
 
 Clone this repository and install dependencies
