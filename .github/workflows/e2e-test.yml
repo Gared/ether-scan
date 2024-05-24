@@ -161,7 +161,7 @@ jobs:
         run: |
           npm install pnpm -g
           bin/installDeps.sh
-          pnpm run install-plugins ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
+          pnpm run plugins i ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
           bin/run.sh &
         wait-on: |
           http://localhost:9001
