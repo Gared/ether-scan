@@ -8,7 +8,7 @@ on:
 
 jobs:
   EtherpadWithNginxReverseProxy:
-    name: Etherpad docker "1.8.17" and nginx reverse proxy (no websocket)
+    name: Docker [1.8.17] + Nginx (no websocket)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -42,13 +42,13 @@ jobs:
           expected_result: PASSED
 
   Etherpad2WithNginxReverseProxy:
-    name: Etherpad docker "${{ matrix.versions.tag }}" and nginx reverse proxy (no websocket)
+    name: Docker [${{ matrix.versions.tag }}] + Nginx (no websocket)
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         versions: [
-          { tag: "develop", expected: "2.0.3" },
+          { tag: "develop", expected: "2.1.0" },
           { tag: "2.0.2", expected: "2.0.2" },
           { tag: "2.0.0", expected: "2.0.0" },
         ]
@@ -85,8 +85,19 @@ jobs:
             expected_result: PASSED
 
   EtherpadWithNginxReverseProxyInSubPath:
-    name: Etherpad docker "1.8.18" and nginx reverse proxy with subpath
+    name: Docker [${{ matrix.versions.tag }}] + Nginx (with subpath)
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        versions: [
+          { tag: "develop", expected: "2.1.0" },
+          { tag: "2.0.2", expected: "2.0.2" },
+          { tag: "2.0.0", expected: "2.0.0" },
+          { tag: "1.9.7", expected: "1.9.7" },
+          { tag: "1.8.18", expected: "1.8.18" },
+        ]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -96,7 +107,7 @@ jobs:
 
       - name: Start docker containers
         run: |
-          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.8.18
+          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:${{ matrix.versions.tag }}
           docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_subpath.conf:/etc/nginx/nginx.conf -d nginx:1.25
 
       - name: Cache Composer packages
@@ -115,11 +126,11 @@ jobs:
         uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: bin/console.php ether:scan http://localhost:8080/etherpad
-          contains: "Package version: 1.8.18"
+          contains: "Package version: ${{ matrix.versions.expected }}"
           expected_result: PASSED
 
   EtherpadWithNginxReverseProxyWithoutSubPath:
-    name: Etherpad docker "1.9.7" and nginx reverse proxy without subpath
+    name: Docker [1.9.7] + Nginx (without subpath)
     runs-on: ubuntu-latest
     steps:
       -   name: Checkout repository
@@ -153,7 +164,7 @@ jobs:
             expected_result: PASSED
 
   EtherpadWithPlugins:
-    name: Etherpad "develop" with plugins
+    name: Source [develop] with plugins
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
@@ -204,7 +215,7 @@ jobs:
         expected_result: PASSED
 
   LatestEtherpad:
-    name: Etherpad docker "latest"
+    name: Docker [latest]
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -236,7 +247,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad docker "${{ matrix.versions.tag }}"
+    name: Docker [${{ matrix.versions.tag }}]
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -247,7 +258,8 @@ jobs:
     strategy:
       matrix:
         versions: [
-          {tag: "develop", expected: "2.0.3"},
+          {tag: "develop", expected: "2.1.0"},
+          {tag: "2.0.3", expected: "2.0.3"},
           {tag: "1.9.7", expected: "1.9.7"},
           {tag: "1.9.0", expected: "1.9.0"},
           {tag: "1.8.18", expected: "1.8.18"},
