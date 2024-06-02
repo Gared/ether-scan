@@ -4,7 +4,7 @@ services:
         ports:
             - 8080:80
         volumes:
-            - ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
+            - ./nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf
     etherpad:
         image: etherpad/etherpad:2.0.2
         environment:
