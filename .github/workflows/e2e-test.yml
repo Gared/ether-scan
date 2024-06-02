@@ -248,6 +248,7 @@ jobs:
       matrix:
         versions: [
           {tag: "develop", expected: "2.1.0"},
+          {tag: "2.0.3", expected: "2.0.3"},
           {tag: "2.0.2", expected: "2.0.2"},
           {tag: "1.9.7", expected: "1.9.7"},
           {tag: "1.9.0", expected: "1.9.0"},
