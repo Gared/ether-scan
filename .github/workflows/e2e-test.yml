@@ -16,7 +16,7 @@ jobs:
 
       - name: Start docker containers
         run: |
-          EP_VERSION=1.8.17 docker compose -f ./tests/e2e/docker/docker-compose.yml up -d --wait
+          EP_VERSION=1.8.17 docker compose -f ./tests/e2e/docker/docker-compose.no_websocket.yml up -d --wait
 
       - name: Cache Composer packages
         id: composer-cache
@@ -55,7 +55,7 @@ jobs:
 
       - name: Start docker containers
         run: |
-          EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.yml up -d --wait
+          EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.no_websocket.yml up -d --wait
 
       - name: Cache Composer packages
         id: composer-cache
@@ -98,13 +98,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: docker network
-        run: docker network create --subnet=172.23.42.0/16 test_net
-
       - name: Start docker containers
         run: |
-          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:${{ matrix.versions.tag }}
-          docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_subpath.conf:/etc/nginx/nginx.conf -d nginx:1.25
+          EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.subpath.yml up -d --wait
 
       - name: Cache Composer packages
         id: composer-cache
