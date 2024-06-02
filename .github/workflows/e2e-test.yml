@@ -75,7 +75,7 @@ jobs:
               ${{ runner.os }}-php-
 
       -   name: Install dependencies
-          run: composer install --prefer-dist --no-progress --no-dev
+          run: composer install --prefer-dist --no-progress
 
       -   name: Scan etherpad instance
           uses: GuillaumeFalourd/assert-command-line-output@v2.3
