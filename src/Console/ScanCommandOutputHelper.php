@@ -24,9 +24,9 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
     ) {
     }
 
-    public function onScanApiStart(): void
+    public function onScanApiStart(string $baseUrl): void
     {
-        $this->symfonyStyle->title('Starting scan of api...');
+        $this->symfonyStyle->title('Starting scan of api: ' . $baseUrl);
     }
 
     public function onScanApiResponse(ResponseInterface $response): void
@@ -60,11 +60,6 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->info($text);
     }
 
-    public function onScanPluginsStart(): void
-    {
-        $this->symfonyStyle->title('Starting scan of plugins...');
-    }
-
     public function onScanPluginsList(array $plugins): void
     {
         if (count($plugins) === 0) {
@@ -72,12 +67,15 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             return;
         }
 
-        $this->symfonyStyle->listing(array_keys($plugins));
-    }
+        $this->symfonyStyle->writeln('Plugins:');
 
-    public function onScanPluginsException(Exception $e): void
-    {
-        $this->symfonyStyle->error($e->getMessage());
+        $pluginData = [];
+        foreach ($plugins as $pluginName => $plugin) {
+            $pluginData[] = $pluginName . '@' . $plugin['package']['version'];
+        }
+        sort($pluginData);
+
+        $this->symfonyStyle->listing($pluginData);
     }
 
     public function onStatsResult(array $data): void
@@ -85,6 +83,12 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         if (isset($data['httpStartTime'])) {
             $startTime = new DateTimeImmutable('@' . ($data['httpStartTime'] / 1000));
             $this->symfonyStyle->info('Server running since: ' . $startTime->format(DateTimeInterface::RFC3339));
+        }
+        if (isset($data['ueberdb_writesFailed']) && $data['ueberdb_writesFailed'] > 0) {
+            $this->symfonyStyle->error('Database writes failed: ' . $data['ueberdb_writesFailed']);
+        }
+        if (isset($data['ueberdb_readsFailed']) && $data['ueberdb_readsFailed'] > 0) {
+            $this->symfonyStyle->error('Database reads failed: ' . $data['ueberdb_readsFailed']);
         }
         $this->output->writeln('Stats: ' . print_r($data, true), OutputInterface::VERBOSITY_DEBUG);
     }

@@ -1,5 +1,5 @@
 
-Starting scan of api...
+Starting scan of api: http://localhost:9001/
 =======================
 
  [INFO] No revision in server header
@@ -9,13 +9,19 @@ Starting scan of api...
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 1.9.7
+
+Plugins:
+ * ep_align
+ * ep_font_size
+ * ep_headings2
+ * ep_markdown
+ * ep_spellcheck
+ * ep_table_of_contents
 
  [OK] Pads are publicly accessible
 
  [OK] Server is healthy
 
- [INFO] Version is 1.9.7
 
 
 Starting scan of admin area...
@@ -26,15 +32,4 @@ Starting scan of admin area...
  [OK] Admin area is not accessible with admin / changeme1
 
  [OK] Admin area is not accessible with user / changeme1
-
-Starting scan of plugins...
-===========================
-
-Plugins:
- * ep_align
- * ep_headings2
- * ep_table_of_contents
- * ep_font_size
- * ep_spellcheck
- * ep_markdown
 

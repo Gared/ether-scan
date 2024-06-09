@@ -8,23 +8,19 @@ on:
 
 jobs:
   EtherpadWithNginxReverseProxy:
-    name: Etherpad and nginx reverse proxy (no websocket)
+    name: Docker [1.8.17] + Nginx (no websocket)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: docker network
-        run: docker network create --subnet=172.23.42.0/16 test_net
-
       - name: Start docker containers
         run: |
-          docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.8.17
-          docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_websocket.conf:/etc/nginx/nginx.conf -d nginx:1.25
+          EP_VERSION=1.8.17 docker compose -f ./tests/e2e/docker/docker-compose.no_websocket.yml up -d --wait
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -35,14 +31,134 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: bin/console.php ether:scan -vvv http://localhost:8080 | grep -E "Package version|HTTP/1.1 400" | sed 's/ *$//'
           assert_file_path: tests/e2e/fixture/reverse_proxy_no_websocket.txt
           expected_result: PASSED
 
+  Etherpad2WithNginxReverseProxy:
+    name: Docker [${{ matrix.versions.tag }}] + Nginx (no websocket)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        versions: [
+          { tag: "develop", expected: "2.1.0" },
+          { tag: "2.0.2", expected: "2.0.2" },
+          { tag: "2.0.0", expected: "2.0.0" },
+        ]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start docker containers
+        run: |
+          EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.no_websocket.yml up -d --wait
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        with:
+          command_line: bin/console.php ether:scan http://localhost:8080
+          contains: "Package version: ${{ matrix.versions.expected }}"
+          expected_result: PASSED
+
+      - name: Dump docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v2
+
+  EtherpadWithNginxReverseProxyInSubPath:
+    name: Docker [${{ matrix.versions.tag }}] + Nginx (with subpath)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        versions: [
+          { tag: "develop", expected: "2.1.0" },
+          { tag: "2.0.2", expected: "2.0.2" },
+          { tag: "2.0.0", expected: "2.0.0" },
+          { tag: "1.9.7", expected: "1.9.7" },
+          { tag: "1.8.18", expected: "1.8.18" },
+        ]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start docker containers
+        run: |
+          EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.subpath.yml up -d --wait
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        with:
+          command_line: bin/console.php ether:scan http://localhost:8080/etherpad
+          contains: "Package version: ${{ matrix.versions.expected }}"
+          expected_result: PASSED
+
+  EtherpadWithNginxReverseProxyWithoutSubPath:
+    name: Docker [1.9.7] + Nginx (without subpath)
+    runs-on: ubuntu-latest
+    steps:
+      -   name: Checkout repository
+          uses: actions/checkout@v4
+
+      -   name: docker network
+          run: docker network create --subnet=172.23.42.0/16 test_net
+
+      -   name: Start docker containers
+          run: |
+            docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.9.7
+            docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_subpath.conf:/etc/nginx/nginx.conf -d nginx:1.25
+
+      -   name: Cache Composer packages
+          id: composer-cache
+          uses: actions/cache@v4
+          with:
+            path: vendor
+            key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+            restore-keys: |
+              ${{ runner.os }}-php-
+
+      -   name: Install dependencies
+          run: composer install --prefer-dist --no-progress
+
+      -   name: Scan etherpad instance
+          uses: GuillaumeFalourd/assert-command-line-output@v2.3
+          with:
+            command_line: bin/console.php ether:scan http://localhost:8080/test
+            contains: "Package version: 1.9.7"
+            expected_result: PASSED
+
   EtherpadWithPlugins:
-    name: Etherpad with plugins
+    name: Source [develop] with plugins
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
@@ -57,24 +173,43 @@ jobs:
       name: Start etherpad service
       with:
         run: |
-          npm install --no-save --legacy-peer-deps ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown 
-          src/bin/run.sh &
+          npm install pnpm -g
+          bin/installDeps.sh
+          pnpm run plugins i ep_align ep_headings2 ep_table_of_contents ep_font_size ep_spellcheck ep_markdown
+          bin/run.sh &
         wait-on: |
           http://localhost:9001
-        tail: true
-        log-output-resume: stderr
+        log-output-if: failure
         wait-for: 5m
         working-directory: etherpad
 
-    - name: Scan etherpad instance
-      uses: GuillaumeFalourd/assert-command-line-output@v2.2
+    - name: Checkout repository
+      uses: actions/checkout@v4
       with:
-        command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
-        assert_file_path: tests/e2e/fixture/master_with_plugins.txt
+        path: app
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+      working-directory: ./app
+
+    - name: Scan etherpad instance
+      uses: GuillaumeFalourd/assert-command-line-output@v2.3
+      with:
+        command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -vE "(Version is|Package version)" | grep -v "Server running since" | cut -d'@' -f1
+        assert_file_path: app/tests/e2e/fixture/master_with_plugins.txt
         expected_result: PASSED
 
   LatestEtherpad:
-    name: Latest etherpad
+    name: Docker [latest]
     runs-on: ubuntu-latest
     services:
       etherpad:
@@ -88,7 +223,7 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -99,31 +234,41 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
           assert_file_path: tests/e2e/fixture/latest.txt
           expected_result: PASSED
 
   EtherpadDifferentVersion:
-    name: Etherpad ${{ matrix.version }}
+    name: Docker [${{ matrix.versions.tag }}]
     runs-on: ubuntu-latest
     services:
       etherpad:
-        image: etherpad/etherpad:${{ matrix.version }}
+        image: etherpad/etherpad:${{ matrix.versions.tag }}
         ports:
           - 9001:9001
 
     strategy:
       matrix:
-        version: ["1.9.0", "1.8.18", "1.8.0", "1.7.5"]
+        versions: [
+          {tag: "develop", expected: "2.1.0"},
+          {tag: "2.1.0", expected: "2.1.0"},
+          {tag: "2.0.3", expected: "2.0.3"},
+          {tag: "1.9.7", expected: "1.9.7"},
+          {tag: "1.9.0", expected: "1.9.0"},
+          {tag: "1.8.18", expected: "1.8.18"},
+          {tag: "1.8.0", expected: "1.8.0"},
+          {tag: "1.7.5", expected: "1.7.5"}
+        ]
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -134,8 +279,8 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
-          contains: "Package version: ${{ matrix.version }}"
+          contains: "Package version: ${{ matrix.versions.expected }}"
           expected_result: PASSED

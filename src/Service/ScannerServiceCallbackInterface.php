@@ -12,7 +12,7 @@ use Throwable;
 
 interface ScannerServiceCallbackInterface
 {
-    public function onScanApiStart(): void;
+    public function onScanApiStart(string $baseUrl): void;
 
     public function onScanApiResponse(ResponseInterface $response): void;
 
@@ -24,11 +24,7 @@ interface ScannerServiceCallbackInterface
 
     public function onScanApiVersion(string $apiVersion): void;
 
-    public function onScanPluginsStart(): void;
-
     public function onScanPluginsList(array $plugins): void;
-
-    public function onScanPluginsException(Exception $e): void;
 
     public function onStatsResult(array $data): void;
 
