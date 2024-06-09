@@ -84,6 +84,12 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             $startTime = new DateTimeImmutable('@' . ($data['httpStartTime'] / 1000));
             $this->symfonyStyle->info('Server running since: ' . $startTime->format(DateTimeInterface::RFC3339));
         }
+        if (isset($data['ueberdb_writesFailed']) && $data['ueberdb_writesFailed'] > 0) {
+            $this->symfonyStyle->error('Database writes failed: ' . $data['ueberdb_writesFailed']);
+        }
+        if (isset($data['ueberdb_readsFailed']) && $data['ueberdb_readsFailed'] > 0) {
+            $this->symfonyStyle->error('Database reads failed: ' . $data['ueberdb_readsFailed']);
+        }
         $this->output->writeln('Stats: ' . print_r($data, true), OutputInterface::VERBOSITY_DEBUG);
     }
 
