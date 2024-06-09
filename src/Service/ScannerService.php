@@ -140,7 +140,7 @@ class ScannerService
 
     private function scanApi(ScannerServiceCallbackInterface $callback): void
     {
-        $callback->onScanApiStart();
+        $callback->onScanApiStart($this->baseUrl);
         try {
             $response = $this->client->get($this->baseUrl . 'api');
             $callback->onScanApiResponse($response);

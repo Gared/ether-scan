@@ -24,9 +24,9 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
     ) {
     }
 
-    public function onScanApiStart(): void
+    public function onScanApiStart(string $baseUrl): void
     {
-        $this->symfonyStyle->title('Starting scan of api...');
+        $this->symfonyStyle->title('Starting scan of api: ' . $baseUrl);
     }
 
     public function onScanApiResponse(ResponseInterface $response): void
