@@ -327,7 +327,9 @@ class ScannerService
     private function getFileHash(string $path): ?string
     {
         try {
-            $response = $this->client->get($this->baseUrl . $path);
+            $response = $this->client->get($this->baseUrl . $path, [
+                'headers' => ['Accept-Encoding' => 'gzip']
+            ]);
             $body = (string) $response->getBody();
             return hash('md5', $body);
         } catch (GuzzleException) {
