@@ -57,13 +57,14 @@ class GenerateFileHashesCommand extends Command
                 'base_uri' => $url,
                 'timeout' => 5.0,
             ]);
-            $response = $client->get($path);
-            $body = (string) $response->getBody();
-            if(str_contains($body, "\n")) {
-                var_dump('NO MINIFY');
-            }
+            $response = $client->get($path, [
+                'headers' => ['Accept-Encoding' => 'gzip'],
+            ]);
+
+            $body = (string)$response->getBody();
             return hash('md5', $body);
-        } catch (GuzzleException) {
+        } catch (GuzzleException $e) {
+            var_dump($e->getMessage());
         }
 
         return null;
