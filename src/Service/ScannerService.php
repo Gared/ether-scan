@@ -551,7 +551,7 @@ class ScannerService
             ]
         ]), $callback->getConsoleLogger());
 
-        $socketIoClient->initialize();
+        $socketIoClient->connect();
         $socketIoClient->of('/');
         $socketIoClient->emit('message', [
             'component' => 'pad',
