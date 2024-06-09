@@ -87,6 +87,10 @@ class ScannerService
             ->withFragment('')
             ->withQuery('');
 
+        if ($uri->getScheme() === '') {
+            $uri = $uri->withScheme('http');
+        }
+
         while (true) {
             $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
             $result = $this->scanForPath($uriWithPad);
