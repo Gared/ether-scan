@@ -38,7 +38,8 @@ class ScannerService
     private string $padId;
 
     public function __construct(
-        string $url
+        string $url,
+        float $timeout = 2.0,
     ) {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
@@ -47,7 +48,7 @@ class ScannerService
         $this->baseUrl = $url;
 
         $this->client = new Client([
-            'timeout' => 2.0,
+            'timeout' => $timeout,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
                 'User-Agent' => 'EtherpadScanner/3.1.1',
