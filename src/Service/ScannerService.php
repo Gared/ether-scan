@@ -38,7 +38,8 @@ class ScannerService
     private string $padId;
 
     public function __construct(
-        string $url
+        string $url,
+        float $timeout = 2.0,
     ) {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
@@ -47,10 +48,10 @@ class ScannerService
         $this->baseUrl = $url;
 
         $this->client = new Client([
-            'timeout' => 2.0,
+            'timeout' => $timeout,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/3.1.1',
+                'User-Agent' => 'EtherpadScanner/3.2.0',
             ],
             'handler' => $stack,
             'verify' => false,
@@ -85,6 +86,10 @@ class ScannerService
         $uri = (new Uri($this->baseUrl))
             ->withFragment('')
             ->withQuery('');
+
+        if ($uri->getScheme() === '') {
+            $uri = $uri->withScheme('http');
+        }
 
         while (true) {
             $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
@@ -140,7 +145,7 @@ class ScannerService
 
     private function scanApi(ScannerServiceCallbackInterface $callback): void
     {
-        $callback->onScanApiStart();
+        $callback->onScanApiStart($this->baseUrl);
         try {
             $response = $this->client->get($this->baseUrl . 'api');
             $callback->onScanApiResponse($response);

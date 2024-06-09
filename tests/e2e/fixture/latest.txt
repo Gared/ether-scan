@@ -1,5 +1,5 @@
 
-Starting scan of api...
+Starting scan of api: http://localhost:9001/
 =======================
 
  [INFO] No revision in server header
