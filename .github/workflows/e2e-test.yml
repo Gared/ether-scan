@@ -130,13 +130,9 @@ jobs:
       -   name: Checkout repository
           uses: actions/checkout@v4
 
-      -   name: docker network
-          run: docker network create --subnet=172.23.42.0/16 test_net
-
       -   name: Start docker containers
           run: |
-            docker run --network test_net --ip 172.23.42.2 --rm -p 9001:9001 -e 'TRUST_PROXY=true' -d etherpad/etherpad:1.9.7
-            docker run --network test_net --ip 172.23.42.1 --rm -p 8080:80 -v ./tests/e2e/docker/nginx/nginx_no_subpath.conf:/etc/nginx/nginx.conf -d nginx:1.25
+            EP_VERSION=1.9.7 docker compose -f ./tests/e2e/docker/docker-compose.reverse_proxy.yml up -d --wait
 
       -   name: Cache Composer packages
           id: composer-cache
