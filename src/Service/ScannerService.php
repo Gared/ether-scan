@@ -593,7 +593,7 @@ class ScannerService
             }
         }
 
-        $socketIoClient->close();
+        $socketIoClient->disconnect();
     }
 
     public function getBaseUrl(): string
