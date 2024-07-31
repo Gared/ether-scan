@@ -133,7 +133,7 @@ class ScannerService
         try {
             $response = $this->client->get($uri->__toString());
             $body = (string) $response->getBody();
-            $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, 'ep_etherpad-lite');
+            $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, '"editorcontainer"');
             if ($isEtherpad) {
                 return true;
             }
