@@ -32,20 +32,18 @@ class GenerateFileHashesCommand extends Command
 
         $fileHashLookup = new FileHashLookupService();
 
-        $attributePoolHash = $this->getFileHash($url, 'static/js/AttributePool.js');
-        $attributesHash = $this->getFileHash($url, 'static/js/attributes.js');
-        $padEditbarHash = $this->getFileHash($url, 'static/js/pad_editbar.js');
-        $padHash = $this->getFileHash($url, 'static/js/pad.js');
-        $padUtilsHash = $this->getFileHash($url, 'static/js/pad_utils.js');
+        $files = FileHashLookupService::getFileNames();
+
+        $tableRows = [];
+
+        foreach  ($files as $file) {
+            $fileHash = $this->getFileHash($url, $file);
+            $versionRange = $fileHashLookup->getEtherpadVersionRange($file, $fileHash);
+            $tableRows[] = [$file, $fileHash, $versionRange];
+        }
 
         $symfonyStyle = new SymfonyStyle($input, $output);
-        $symfonyStyle->table(['File', 'Hash', 'Version'], [
-            ['static/js/AttributePool.js', $attributePoolHash, $fileHashLookup->getEtherpadVersionRange('static/js/AttributePool.js', $attributePoolHash)],
-            ['static/js/attributes.js', $attributesHash, $fileHashLookup->getEtherpadVersionRange('static/js/attributes.js', $attributesHash)],
-            ['static/js/pad_editbar.js', $padEditbarHash, $fileHashLookup->getEtherpadVersionRange('static/js/pad_editbar.js', $padEditbarHash)],
-            ['static/js/pad.js', $padHash, $fileHashLookup->getEtherpadVersionRange('static/js/pad.js', $padHash)],
-            ['static/js/pad_utils.js', $padUtilsHash, $fileHashLookup->getEtherpadVersionRange('static/js/pad_utils.js', $padUtilsHash)],
-        ]);
+        $symfonyStyle->table(['File', 'Hash', 'Version'], $tableRows);
 
         return self::SUCCESS;
     }
@@ -57,13 +55,14 @@ class GenerateFileHashesCommand extends Command
                 'base_uri' => $url,
                 'timeout' => 5.0,
             ]);
-            $response = $client->get($path);
-            $body = (string) $response->getBody();
-            if(str_contains($body, "\n")) {
-                var_dump('NO MINIFY');
-            }
+            $response = $client->get($path, [
+                'headers' => ['Accept-Encoding' => 'gzip'],
+            ]);
+
+            $body = (string)$response->getBody();
             return hash('md5', $body);
-        } catch (GuzzleException) {
+        } catch (GuzzleException $e) {
+            var_dump($e->getMessage());
         }
 
         return null;

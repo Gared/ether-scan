@@ -1,0 +1,13 @@
+services:
+    web:
+        image: nginx:1.25
+        ports:
+            - 8080:80
+        volumes:
+            - ./nginx/nginx_no_subpath.conf:/etc/nginx/nginx.conf
+        depends_on:
+            - etherpad
+    etherpad:
+        image: etherpad/etherpad:$EP_VERSION
+        environment:
+            - TRUST_PROXY=true

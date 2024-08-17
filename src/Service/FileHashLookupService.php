@@ -16,11 +16,13 @@ class FileHashLookupService
             '3b016b68f81bf91d03f57b7ab560e78d' => ['1.8.8', '1.8.14'],
             '7bfcb69a6bee4bdd500d5a5faae61db8' => ['1.8.15', '1.8.15'],
             '1ab82b2042cc551cf0205166f36fa625' => ['1.8.16', '1.8.18'],
-            '27a349df6d68dcc316c63f396b481927' => ['1.9.0', null],
+            '27a349df6d68dcc316c63f396b481927' => ['1.9.0', '2.1.0'],
+            '24478719e9641726d55b26e97466708b' => ['2.1.1', null],
         ],
         'static/js/attributes.js' => [
             null => [null, '1.8.18'],
-            '3b78aa8c55200e09fe709178721c0e30' => ['1.9.0', null],
+            '3b78aa8c55200e09fe709178721c0e30' => ['1.9.0', '2.1.0'],
+            '9dbc0d1414a1f4696d66c5b89c3e9abc' => ['2.1.1', null],
         ],
         'static/js/pad_editbar.js' => [
             '34a86fe81588f76b8def068331a11936' => [null, '1.8.0'],
@@ -32,7 +34,8 @@ class FileHashLookupService
             'c8b681fbc13584006f5ec40ef1fc5fd2' => ['1.8.10', '1.8.14'],
             '9f3f1343f7585299bd0dc4e1dcbddff9' => ['1.8.14', '1.9.1'],
             '4f7669997ae0cbb5d9fc502b79cb2b50' => ['1.9.2', '1.9.2'],
-            'd9d3f04a6b532773d02f463e2df34306' => ['1.9.3', null],
+            'd9d3f04a6b532773d02f463e2df34306' => ['1.9.3', '2.1.0'],
+            '33c2045f954bce58d7f5ac17aa1d7f04' => ['2.1.1', null],
         ],
         'static/js/pad.js' => [
             'c0d22189c3497e2da29607f5cb6f47b1' => [null, '1.8.0'],
@@ -50,7 +53,9 @@ class FileHashLookupService
             '4a9a47f791c40d794e7293d90ac571bf' => ['1.9.0', '1.9.1'],
             'a0625d1d18451d7ac8c0cca439f00a08' => ['1.9.2', '1.9.7'],
             'c643215708e10eea297d27e9b2f764f0' => ['2.0.0', '2.0.2'],
-            'b022b626a88d09c7b9f0ab27b34eaa82' => ['2.0.3', null],
+            'b022b626a88d09c7b9f0ab27b34eaa82' => ['2.0.3', '2.1.0'],
+            'd9be661d2b7120ffbb06797c66a7a3d7' => ['2.1.1', '2.1.1'],
+            '5ed224a48ab04f1436f77372be2bfb4e' => ['2.2.2', null],
         ],
         'static/js/pad_utils.js' => [
             'a7072962ca5031754c382373fc6fceb9' => [null, '1.8.0'],
@@ -62,9 +67,22 @@ class FileHashLookupService
             'ba36ceb4b40845de8545334caca02163' => ['1.8.15', '1.8.18'],
             '3e44cb62ef2a60779e8a3684f8f0a905' => ['1.9.0', '1.9.0'],
             'fc1965c84113e78fb5b29b68c8fc84f8' => ['1.9.1', '1.9.1'],
-            'e1d8c5fc1e4fcfe28b527828543a4729' => ['1.9.2', null],
+            'e1d8c5fc1e4fcfe28b527828543a4729' => ['1.9.2', '2.1.0'],
+            '96fd880e3e348fe4b45170b7c750a0b1' => ['2.1.1', '2.1.1'],
+            'a9aa5b16c8e3ff79933156220cb87dbf' => ['2.2.2', null],
+        ],
+        'static/css/pad.css' => [
+            '169c79ec1a44c5c45dfce64c0f62c7ef' => [null, '1.9.7'],
+            '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
+            '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
+            '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', null],
         ],
     ];
+
+    public static function getFileNames(): array
+    {
+        return array_keys(self::FILE_HASH_VERSIONS);
+    }
 
     public function getEtherpadVersionRange(string $fileName, ?string $hash): ?VersionRange
     {
