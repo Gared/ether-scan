@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.7.1",
+            "version": "v4.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "944682418d6d081988d1683b2d5a6239eded027d"
+                "reference": "3941a473f5c0d3c1755bf63e7bdd9ac07578752f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/944682418d6d081988d1683b2d5a6239eded027d",
-                "reference": "944682418d6d081988d1683b2d5a6239eded027d",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/3941a473f5c0d3c1755bf63e7bdd9ac07578752f",
+                "reference": "3941a473f5c0d3c1755bf63e7bdd9ac07578752f",
                 "shasum": ""
             },
             "require": {
@@ -78,9 +78,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ElephantIO/elephant.io/issues",
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.7.1"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.7.2"
             },
-            "time": "2024-03-19T02:49:15+00:00"
+            "time": "2024-07-10T17:31:52+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
