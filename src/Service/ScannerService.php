@@ -266,16 +266,11 @@ class ScannerService
 
     private function scanStaticFiles(ScannerServiceCallbackInterface $callback): void
     {
-        $hash = $this->getFileHash('static/js/AttributePool.js');
-        $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/AttributePool.js', $hash);
-        $hash = $this->getFileHash('static/js/attributes.js');
-        $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/attributes.js', $hash);
-        $hash = $this->getFileHash('static/js/pad_editbar.js');
-        $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad_editbar.js', $hash);
-        $hash = $this->getFileHash('static/js/pad.js');
-        $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad.js', $hash);
-        $hash = $this->getFileHash('static/js/pad_utils.js');
-        $this->versionRanges[] = $this->fileHashLookup->getEtherpadVersionRange('static/js/pad_utils.js', $hash);
+        foreach (FileHashLookupService::getFileNames() as $file) {
+            $hash = $this->getFileHash($file);
+            $versionRange = $this->fileHashLookup->getEtherpadVersionRange($file, $hash);
+            $this->versionRanges[] = $versionRange;
+        }
     }
 
     private function progressVersionRanges(ScannerServiceCallbackInterface $callback): void
