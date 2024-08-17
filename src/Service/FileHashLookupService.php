@@ -71,7 +71,18 @@ class FileHashLookupService
             '96fd880e3e348fe4b45170b7c750a0b1' => ['2.1.1', '2.1.1'],
             'a9aa5b16c8e3ff79933156220cb87dbf' => ['2.2.2', null],
         ],
+        'static/css/pad.css' => [
+            '169c79ec1a44c5c45dfce64c0f62c7ef' => [null, '1.9.7'],
+            '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
+            '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
+            '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', null],
+        ],
     ];
+
+    public static function getFileNames(): array
+    {
+        return array_keys(self::FILE_HASH_VERSIONS);
+    }
 
     public function getEtherpadVersionRange(string $fileName, ?string $hash): ?VersionRange
     {
