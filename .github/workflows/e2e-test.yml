@@ -44,7 +44,7 @@ jobs:
     strategy:
       matrix:
         versions: [
-          { tag: "develop", expected: "2.1.1" },
+          { tag: "develop", expected: "2.2.2" },
           { tag: "2.0.2", expected: "2.0.2" },
           { tag: "2.0.0", expected: "2.0.0" },
         ]
@@ -88,7 +88,7 @@ jobs:
     strategy:
       matrix:
         versions: [
-          { tag: "develop", expected: "2.1.1" },
+          { tag: "develop", expected: "2.2.2" },
           { tag: "2.0.2", expected: "2.0.2" },
           { tag: "2.0.0", expected: "2.0.0" },
           { tag: "1.9.7", expected: "1.9.7" },
@@ -248,7 +248,7 @@ jobs:
     strategy:
       matrix:
         versions: [
-          {tag: "develop", expected: "2.1.1"},
+          {tag: "develop", expected: "2.2.2"},
           {tag: "2.1.0", expected: "2.1.0"},
           {tag: "2.0.3", expected: "2.0.3"},
           {tag: "1.9.7", expected: "1.9.7"},
