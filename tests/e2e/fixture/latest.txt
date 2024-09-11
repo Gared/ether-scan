@@ -9,7 +9,7 @@ Starting scan of api: http://localhost:9001/
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 2.2.2
+ [INFO] Package version: $EP_VERSION
 
  [INFO] No plugins found
 
@@ -17,7 +17,7 @@ Starting scan of a pad...
 
  [OK] Server is healthy
 
- [INFO] Version is 2.2.2
+ [INFO] Version is $EP_VERSION
 
 
 Starting scan of admin area...
