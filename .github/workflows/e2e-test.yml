@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: '[
-          { tag: "develop", expected: "${{ steps.etherpad.outputs.release }}" },
+          { tag: "develop", expected: "${{ steps.etherpad-version-cleaned.outputs.release }}" },
           { tag: "2.0.2", expected: "2.0.2" },
           { tag: "2.0.0", expected: "2.0.0" }
         ]'
@@ -21,6 +21,12 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ether/etherpad-lite
+      - id: etherpad-version-cleaned
+        name: character-replacement-test
+        run: |
+          LATEST_RELEASE=${{ steps.etherpad.outputs.release }}
+          CLEANED_VERSION="${LATEST_RELEASE//v/}"
+          echo $CLEANED_VERSION >> "$GITHUB_OUTPUT"
 
   EtherpadWithNginxReverseProxy:
     name: Docker [1.8.17] + Nginx (no websocket)
