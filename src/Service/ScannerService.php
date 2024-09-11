@@ -30,6 +30,9 @@ class ScannerService
     private readonly RevisionLookupService $revisionLookup;
     private string $baseUrl;
     private ?string $pathPrefix = null;
+    /**
+     * @var VersionRange[]
+     */
     private array $versionRanges;
     private ?string $apiVersion = null;
     private ?string $packageVersion = null;

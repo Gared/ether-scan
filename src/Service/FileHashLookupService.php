@@ -7,6 +7,9 @@ use Gared\EtherScan\Model\VersionRange;
 
 class FileHashLookupService
 {
+    /**
+     * @var array<string, array<string, array<string|null>>>
+     */
     private const FILE_HASH_VERSIONS = [
         'static/js/AttributePool.js' => [
             '4edf12f374e005bfa7d0fc6681caa67f' => [null, '1.8.0'],
@@ -79,6 +82,9 @@ class FileHashLookupService
         ],
     ];
 
+    /**
+     * @return array<string>
+     */
     public static function getFileNames(): array
     {
         return array_keys(self::FILE_HASH_VERSIONS);

@@ -61,7 +61,7 @@ class CheckFileHashesCommand extends Command
     /**
      * @param VersionRange[] $versionRanges
      */
-    private function calculateVersion(array $versionRanges): ?VersionRange
+    private function calculateVersion(array $versionRanges): VersionRange
     {
         $versionRanges = array_filter($versionRanges);
 

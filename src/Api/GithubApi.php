@@ -17,6 +17,9 @@ class GithubApi
         ]);
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getCommit(string $commitHash): ?array
     {
         try {
@@ -28,6 +31,9 @@ class GithubApi
         }
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getTags(): ?array
     {
         try {
