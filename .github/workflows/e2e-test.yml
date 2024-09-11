@@ -255,13 +255,13 @@ jobs:
 
       - name: Create expected output file
         run: |
-          cat tests/e2e/fixture/latest.txt | sed 's/$EP_VERSION/${{ needs.DynamicVersionMatrix.outputs.version }}/' > tests/e2e/fixture/latest.txt
+          cat tests/e2e/fixture/latest.txt | sed 's/$EP_VERSION/${{ needs.DynamicVersionMatrix.outputs.version }}/' > /tmp/latest.txt
 
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
-          assert_file_path: tests/e2e/fixture/latest.txt
+          assert_file_path: /tmp/latest.txt
           expected_result: PASSED
 
   EtherpadDifferentVersion:
