@@ -20,16 +20,28 @@ interface ScannerServiceCallbackInterface
 
     public function onScanApiRevision(?string $revision): void;
 
+    /**
+     * @param array<mixed> $commit
+     */
     public function onScanApiRevisionCommit(array $commit): void;
 
     public function onScanApiVersion(string $apiVersion): void;
 
+    /**
+     * @param array<string, mixed> $plugins
+     */
     public function onScanPluginsList(array $plugins): void;
 
+    /**
+     * @param array<mixed, mixed> $data
+     */
     public function onStatsResult(array $data): void;
 
     public function onStatsException(GuzzleException|JsonException $e): void;
 
+    /**
+     * @param array{status?: string, releaseId?: string} $data
+     */
     public function onHealthResult(array $data): void;
 
     public function onHealthException(GuzzleException|JsonException $e): void;
@@ -46,6 +58,9 @@ interface ScannerServiceCallbackInterface
 
     public function onVersionResult(?string $minVersion, ?string $maxVersion): void;
 
+    /**
+     * @param array<mixed, mixed> $data
+     */
     public function onClientVars(string $version, array $data): void;
 
     public function getConsoleLogger(): ?LoggerInterface;
