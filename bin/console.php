@@ -2,6 +2,7 @@
 <?php
 declare(strict_types=1);
 
+use Gared\EtherScan\Console\CheckFileHashesCommand;
 use Gared\EtherScan\Console\GenerateFileHashesCommand;
 use Gared\EtherScan\Console\GenerateRevisionLookupCommand;
 use Gared\EtherScan\Console\ScanCommand;
@@ -13,4 +14,5 @@ $application = new Application();
 $application->add(new ScanCommand());
 $application->add(new GenerateRevisionLookupCommand());
 $application->add(new GenerateFileHashesCommand());
+$application->add(new CheckFileHashesCommand());
 $application->run();

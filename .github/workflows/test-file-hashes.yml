@@ -1,0 +1,75 @@
+name: "Test file hashes"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  DynamicVersionMatrix:
+    name: Dynamic version matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: '[
+          { tag: "${{ steps.etherpad-version-cleaned.outputs.version }}", expected: "${{ steps.etherpad-version-cleaned.outputs.version }}" },
+          { tag: "2.2.2", expected: "2.2.2" },
+          { tag: "2.1.0", expected: "2.1.0" },
+          { tag: "2.0.2", expected: "2.0.2" },
+          { tag: "2.0.0", expected: "2.0.0" },
+          { tag: "1.9.7", expected: "1.9.7" },
+          { tag: "1.8.18", expected: "1.8.18" },
+          { tag: "1.8.5", expected: "1.8.5" },
+          { tag: "1.8.0", expected: "1.8.0" },
+          { tag: "1.7.5", expected: "1.7.5" },
+          { tag: "1.7.0", expected: "1.7.0" },
+          { tag: "1.6.6", expected: "1.6.6" },
+          { tag: "1.6.0", expected: "1.6.0" },
+          { tag: "1.5.7", expected: "1.5.7" },
+          { tag: "1.4.0", expected: "1.4.0" }
+        ]'
+      version: ${{ steps.etherpad-version-cleaned.outputs.version }}
+    steps:
+      - id: etherpad
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ether/etherpad-lite
+      - id: etherpad-version-cleaned
+        run: |
+          LATEST_RELEASE=${{ steps.etherpad.outputs.release }}
+          CLEANED_VERSION="${LATEST_RELEASE//v/}"
+          echo "version=$CLEANED_VERSION" >> "$GITHUB_OUTPUT"
+
+  TestFileHashes:
+    name: Docker [${{ matrix.versions.tag }}]
+    runs-on: ubuntu-latest
+    needs: DynamicVersionMatrix
+
+    services:
+      etherpad:
+        image: etherpad/etherpad:${{ matrix.versions.tag }}
+        ports:
+          - 9001:9001
+
+    strategy:
+      matrix:
+        versions: ${{ fromJSON(needs.DynamicVersionMatrix.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance for file hashes
+        run: bin/console.php ether:check-file-hashes http://localhost:9001 ${{ matrix.versions.expected }}
