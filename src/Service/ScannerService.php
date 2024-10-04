@@ -223,17 +223,6 @@ class ScannerService
             $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $token);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
-
-            try {
-                if ($socketIoVersion === ElephantClient::CLIENT_4X) {
-                    $this->doSocketPolling4($cookies, $token, $callback);
-                    return;
-                }
-
-                $this->doSocketPolling($socketIoVersion, $cookies, $token, $callback);
-            } catch (Exception $e) {
-                $callback->onScanPadException($e);
-            }
         }
     }
 
@@ -562,7 +551,7 @@ class ScannerService
             ]
         ]), $callback->getConsoleLogger());
 
-        $socketIoClient->initialize();
+        $socketIoClient->connect();
         $socketIoClient->of('/');
         $socketIoClient->emit('message', [
             'component' => 'pad',
@@ -602,7 +591,7 @@ class ScannerService
             }
         }
 
-        $socketIoClient->close();
+        $socketIoClient->disconnect();
     }
 
     public function getBaseUrl(): string
