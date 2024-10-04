@@ -60,7 +60,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan -vvv http://localhost:8080 | grep -E "Package version|HTTP/1.1 400" | sed 's/ *$//'
           assert_file_path: tests/e2e/fixture/reverse_proxy_no_websocket.txt
@@ -100,7 +100,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan http://localhost:8080
           contains: "Package version: ${{ matrix.versions.expected }}"
@@ -141,7 +141,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan http://localhost:8080/etherpad
           contains: "Package version: ${{ matrix.versions.expected }}"
@@ -171,7 +171,7 @@ jobs:
           run: composer install --prefer-dist --no-progress
 
       -   name: Scan etherpad instance
-          uses: GuillaumeFalourd/assert-command-line-output@v2.3
+          uses: GuillaumeFalourd/assert-command-line-output@v2.4
           with:
             command_line: bin/console.php ether:scan http://localhost:8080/test
             contains: "Package version: 1.9.7"
@@ -222,7 +222,7 @@ jobs:
       working-directory: ./app
 
     - name: Scan etherpad instance
-      uses: GuillaumeFalourd/assert-command-line-output@v2.3
+      uses: GuillaumeFalourd/assert-command-line-output@v2.4
       with:
         command_line: app/bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -vE "(Version is|Package version)" | grep -v "Server running since" | cut -d'@' -f1
         assert_file_path: app/tests/e2e/fixture/master_with_plugins.txt
@@ -260,7 +260,7 @@ jobs:
           cat tests/e2e/fixture/latest.txt | sed 's/$EP_VERSION/${{ needs.DynamicVersionMatrix.outputs.version }}/' > /tmp/latest.txt
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan http://localhost:9001 | sed 's/ *$//' | grep -v "Server running since"
           assert_file_path: /tmp/latest.txt
@@ -298,7 +298,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
           contains: "Package version: ${{ matrix.versions.expected }}"
