@@ -8,6 +8,7 @@ use ElephantIO\Yeast;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
+use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
 use Gared\EtherScan\Model\VersionRange;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -189,9 +190,6 @@ class ScannerService
         $this->getAdmin('user', 'changeme1', $callback);
     }
 
-    /**
-     * @throws EtherpadServiceNotFoundException
-     */
     private function scanPad(ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanPadStart();
@@ -529,7 +527,7 @@ class ScannerService
         $data = $data[1];
         $accessStatus = $data['accessStatus'] ?? null;
         if ($accessStatus === 'deny') {
-            $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
+            $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
             return;
         }
 
@@ -582,7 +580,7 @@ class ScannerService
             if ($result !== null && is_array($result->data)) {
                 $accessStatus = $result->data['accessStatus'] ?? null;
                 if ($accessStatus === 'deny') {
-                    $callback->onScanPadException(new EtherpadServiceNotFoundException('Pads are not publicly accessible'));
+                    $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
                     return;
                 }
                 $data = $result->data;
