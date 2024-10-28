@@ -15,6 +15,9 @@ class RevisionLookupService
         return $data[$shortHash] ?? null;
     }
 
+    /**
+     * @param array<mixed, mixed> $data
+     */
     public function save(array $data): void
     {
         $data = json_encode($data, JSON_THROW_ON_ERROR);
