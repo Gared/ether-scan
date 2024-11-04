@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8469744c3865329a8a4bdc97ed8c960d",
+    "content-hash": "1d37d15e9345553cdd7b46037b6e2821",
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.3.2",
+            "version": "v4.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7"
+                "reference": "60f849c1e083577d982aa5ac73e3193b3228720b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/ac2e107353cab22cb864b406aa6718163258f3c7",
-                "reference": "ac2e107353cab22cb864b406aa6718163258f3c7",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/60f849c1e083577d982aa5ac73e3193b3228720b",
+                "reference": "60f849c1e083577d982aa5ac73e3193b3228720b",
                 "shasum": ""
             },
             "require": {
@@ -67,18 +67,20 @@
                     "role": "Contributors :)"
                 }
             ],
-            "description": "Send events to a real time websocket engine through PHP",
+            "description": "Send events to a socket.io server through PHP",
             "homepage": "https://elephantio.github.io/elephant.io/",
             "keywords": [
+                "Socket.io",
                 "dialog",
                 "nodejs",
                 "real time",
                 "websocket"
             ],
             "support": {
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.3.2"
+                "issues": "https://github.com/ElephantIO/elephant.io/issues",
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.8.0"
             },
-            "time": "2024-01-29T02:54:29+00:00"
+            "time": "2024-10-30T14:04:49+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -620,16 +622,16 @@
         },
         {
             "name": "psr/log",
-            "version": "3.0.0",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001"
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/fe5ea303b0887d5caefd3d431c3e61ad47037001",
-                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
                 "shasum": ""
             },
             "require": {
@@ -664,9 +666,9 @@
                 "psr-3"
             ],
             "support": {
-                "source": "https://github.com/php-fig/log/tree/3.0.0"
+                "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
-            "time": "2021-07-14T16:46:02+00:00"
+            "time": "2024-09-11T13:17:53+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -1423,13 +1425,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.1",
         "ext-json": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
