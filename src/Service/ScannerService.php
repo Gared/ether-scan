@@ -376,12 +376,8 @@ class ScannerService
             'protocolVersion' => 2,
         ]);
 
-        $expirationTime = microtime(true) + 2;
-
-        while (microtime(true) < $expirationTime) {
-            usleep(10000);
-            $result = $socketIoClient->drain();
-            if ($result !== null && is_array($result->data)) {
+        while ($result = $socketIoClient->wait('message', 2)) {
+            if (is_array($result->data)) {
                 $accessStatus = $result->data['accessStatus'] ?? null;
                 if ($accessStatus === 'deny') {
                     $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
