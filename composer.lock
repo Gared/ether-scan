@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6352119ccf1d59fa9880e4860cfb1ae3",
+    "content-hash": "1d37d15e9345553cdd7b46037b6e2821",
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.7.5",
+            "version": "v4.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "f3f9d9989cb264bac5c4655be7d8acc0466c1d8e"
+                "reference": "60f849c1e083577d982aa5ac73e3193b3228720b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/f3f9d9989cb264bac5c4655be7d8acc0466c1d8e",
-                "reference": "f3f9d9989cb264bac5c4655be7d8acc0466c1d8e",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/60f849c1e083577d982aa5ac73e3193b3228720b",
+                "reference": "60f849c1e083577d982aa5ac73e3193b3228720b",
                 "shasum": ""
             },
             "require": {
@@ -78,9 +78,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ElephantIO/elephant.io/issues",
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.7.5"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.8.0"
             },
-            "time": "2024-10-28T14:15:01+00:00"
+            "time": "2024-10-30T14:04:49+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
