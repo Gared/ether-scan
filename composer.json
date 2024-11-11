@@ -15,6 +15,6 @@
     "elephantio/elephant.io": "4.3.*"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.10"
+    "phpstan/phpstan": "^2.0"
   }
 }
