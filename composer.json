@@ -12,7 +12,7 @@
     "ext-json": "*",
     "guzzlehttp/guzzle": "^7.8",
     "symfony/console": "^6.4|^7.0",
-    "elephantio/elephant.io": "4.3.*"
+    "elephantio/elephant.io": "^4.8"
   },
   "require-dev": {
     "phpstan/phpstan": "^1.10"

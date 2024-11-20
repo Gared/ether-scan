@@ -221,17 +221,6 @@ class ScannerService
             $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $token);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
-
-            try {
-                if ($socketIoVersion === ElephantClient::CLIENT_4X) {
-                    $this->doSocketPolling4($cookies, $token, $callback);
-                    return;
-                }
-
-                $this->doSocketPolling($socketIoVersion, $cookies, $token, $callback);
-            } catch (Exception $e) {
-                $callback->onScanPadException($e);
-            }
         }
     }
 
@@ -356,191 +345,6 @@ class ScannerService
         }
     }
 
-    private function doSocketPolling(
-        int $socketIoVersion,
-        CookieJar $cookies,
-        string $token,
-        ScannerServiceCallbackInterface $callback
-    ): void {
-        $engine = ElephantClient::engine($socketIoVersion, '');
-
-        $queryParameters = [
-            'padId' => $this->padId,
-            'EIO' => $engine->getOptions()['version'],
-            'transport' => 'polling',
-            't' => Yeast::yeast(),
-            'b64' => 1,
-        ];
-
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-        if ($body === 'Welcome to socket.io.') {
-            $this->packageVersion = '1.4.0';
-            throw new Exception('Socket.io 1 not supported');
-        }
-        $curlyBracketPos = strpos($body, '{');
-        if ($curlyBracketPos === false) {
-            throw new Exception('No JSON response: ' . $body);
-        }
-        $body = substr($body, $curlyBracketPos);
-        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        $sid = $data['sid'];
-
-        $queryParameters['sid'] = $sid;
-        $queryParameters['t'] = Yeast::yeast();
-
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-        if ($body !== '2:40') {
-            throw new Exception('Invalid response: ' . $body);
-        }
-
-        $postData = json_encode([
-            'message',
-            [
-                'component' => 'pad',
-                'type' => 'CLIENT_READY',
-                'padId' => $this->padId,
-                'sessionID' => 'null',
-                'token' => $token,
-                'password' => null,
-                'protocolVersion' => 2,
-            ]
-        ]);
-
-        $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->post($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'body' => (mb_strlen($postData) + 2) . ':42' . $postData,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-        if ($body !== 'ok') {
-            throw new Exception('Invalid response: ' . $body);
-        }
-
-        $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $this->handleClientVarsResponse($response, $callback);
-    }
-
-    private function doSocketPolling4(
-        CookieJar $cookies,
-        string $token,
-        ScannerServiceCallbackInterface $callback
-    ): void {
-        $queryParameters = [
-            'padId' => $this->padId,
-            'EIO' => 4,
-            'transport' => 'polling',
-            't' => Yeast::yeast(),
-            'b64' => 1,
-        ];
-
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-        $curlyBracketPos = strpos($body, '{');
-        if ($curlyBracketPos === false) {
-            throw new Exception('No JSON response: ' . $body);
-        }
-        $body = substr($body, $curlyBracketPos);
-        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        $sid = $data['sid'];
-
-        $queryParameters['sid'] = $sid;
-        $queryParameters['t'] = Yeast::yeast();
-
-        $response = $this->client->post($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-            'body' => '40',
-        ]);
-        $body = (string)$response->getBody();
-        if ($body !== 'ok') {
-            throw new Exception('Invalid response: ' . $body);
-        }
-
-        $queryParameters['t'] = Yeast::yeast();
-
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-
-        if (str_starts_with($body, '40') === false) {
-            throw new Exception('Invalid response: ' . $body);
-        }
-
-        $postData = json_encode([
-            'message',
-            [
-                'component' => 'pad',
-                'type' => 'CLIENT_READY',
-                'padId' => $this->padId,
-                'sessionID' => 'null',
-                'token' => $token,
-                'password' => null,
-                'protocolVersion' => 2,
-            ]
-        ]);
-
-        $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->post($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'body' => '42' . $postData,
-            'cookies' => $cookies,
-        ]);
-        $body = (string)$response->getBody();
-        if ($body !== 'ok') {
-            throw new Exception('Invalid response: ' . $body);
-        }
-
-        $queryParameters['t'] = Yeast::yeast();
-        $response = $this->client->get($this->baseUrl . 'socket.io/', [
-            'query' => $queryParameters,
-            'cookies' => $cookies,
-        ]);
-        $this->handleClientVarsResponse($response, $callback);
-    }
-
-    private function handleClientVarsResponse(
-        ResponseInterface $response,
-        ScannerServiceCallbackInterface $callback,
-    ): void
-    {
-        $body = (string)$response->getBody();
-        $body = substr($body, strpos($body, '['));
-        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        $data = $data[1];
-        $accessStatus = $data['accessStatus'] ?? null;
-        if ($accessStatus === 'deny') {
-            $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
-            return;
-        }
-
-        $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
-        $onlyPlugins = $data['data']['plugins']['plugins'];
-        unset($onlyPlugins['ep_etherpad-lite']);
-
-        $this->packageVersion = $version;
-        $callback->onClientVars($version, $data);
-        $callback->onScanPluginsList($onlyPlugins);
-        $callback->onScanPadSuccess();
-    }
-
     private function doSocketWebsocket(
         int $socketIoVersion,
         string $cookieString,
@@ -560,7 +364,7 @@ class ScannerService
             ]
         ]), $callback->getConsoleLogger());
 
-        $socketIoClient->initialize();
+        $socketIoClient->connect();
         $socketIoClient->of('/');
         $socketIoClient->emit('message', [
             'component' => 'pad',
@@ -572,12 +376,8 @@ class ScannerService
             'protocolVersion' => 2,
         ]);
 
-        $expirationTime = microtime(true) + 2;
-
-        while (microtime(true) < $expirationTime) {
-            usleep(10000);
-            $result = $socketIoClient->drain();
-            if ($result !== null && is_array($result->data)) {
+        while ($result = $socketIoClient->wait('message', 2)) {
+            if (is_array($result->data)) {
                 $accessStatus = $result->data['accessStatus'] ?? null;
                 if ($accessStatus === 'deny') {
                     $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
@@ -600,7 +400,7 @@ class ScannerService
             }
         }
 
-        $socketIoClient->close();
+        $socketIoClient->disconnect();
     }
 
     public function getBaseUrl(): string
