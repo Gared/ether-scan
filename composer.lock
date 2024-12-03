@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.12.0",
+            "version": "v4.12.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "b10a7f68ae044b25b31c89ca7a7484853c1d2bd7"
+                "reference": "fe65ded4d625bd794a13463875c89411f1b71abf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/b10a7f68ae044b25b31c89ca7a7484853c1d2bd7",
-                "reference": "b10a7f68ae044b25b31c89ca7a7484853c1d2bd7",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/fe65ded4d625bd794a13463875c89411f1b71abf",
+                "reference": "fe65ded4d625bd794a13463875c89411f1b71abf",
                 "shasum": ""
             },
             "require": {
@@ -78,9 +78,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ElephantIO/elephant.io/issues",
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.12.0"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.12.2"
             },
-            "time": "2024-11-19T00:45:41+00:00"
+            "time": "2024-12-03T03:35:09+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
