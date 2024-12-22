@@ -83,7 +83,7 @@ class FileHashLookupService
     ];
 
     /**
-     * @return array<string>
+     * @return list<string>
      */
     public static function getFileNames(): array
     {

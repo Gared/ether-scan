@@ -169,6 +169,11 @@ class ScannerService
             try {
                 $body = (string)$response->getBody();
                 $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+
+                if (isset($data['currentVersion']) === false) {
+                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
+                }
+
                 $apiVersion = $data['currentVersion'];
                 $versionRange = $this->versionLookup->getEtherpadVersionRange($apiVersion);
                 $this->apiVersion = $apiVersion;
