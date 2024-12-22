@@ -38,7 +38,10 @@ class CheckFileHashesCommand extends Command
         $versionRanges = [];
         foreach  ($files as $file) {
             $fileHash = $this->getFileHash($url, $file);
-            $versionRanges[] = $fileHashLookup->getEtherpadVersionRange($file, $fileHash);
+            $versionRange = $fileHashLookup->getEtherpadVersionRange($file, $fileHash);
+            if ($versionRange !== null) {
+                $versionRanges[] = $versionRange;
+            }
         }
 
         $versionRange = $this->calculateVersion($versionRanges);
@@ -59,12 +62,10 @@ class CheckFileHashesCommand extends Command
     }
 
     /**
-     * @param VersionRange[] $versionRanges
+     * @param list<VersionRange> $versionRanges
      */
     private function calculateVersion(array $versionRanges): VersionRange
     {
-        $versionRanges = array_filter($versionRanges);
-
         if (count($versionRanges) === 0) {
             throw new \Exception('No version ranges found');
         }

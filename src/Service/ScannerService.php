@@ -32,7 +32,7 @@ class ScannerService
     private string $baseUrl;
     private ?string $pathPrefix = null;
     /**
-     * @var VersionRange[]
+     * @var list<VersionRange|null>
      */
     private array $versionRanges;
     private ?string $apiVersion = null;
