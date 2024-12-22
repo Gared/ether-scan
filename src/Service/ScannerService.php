@@ -4,12 +4,10 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use ElephantIO\Client as ElephantClient;
-use ElephantIO\Yeast;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
-use Gared\EtherScan\Model\VersionRange;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
@@ -29,16 +27,10 @@ class ScannerService
     private readonly Client $client;
     private readonly FileHashLookupService $fileHashLookup;
     private readonly RevisionLookupService $revisionLookup;
+    private readonly VersionRangeService $versionRangeService;
     private string $baseUrl;
     private ?string $pathPrefix = null;
-    /**
-     * @var list<VersionRange|null>
-     */
-    private array $versionRanges;
     private ?string $apiVersion = null;
-    private ?string $packageVersion = null;
-    private ?string $revisionVersion = null;
-    private ?string $healthVersion = null;
     private string $padId;
 
     public function __construct(
@@ -64,6 +56,7 @@ class ScannerService
         $this->versionLookup = new ApiVersionLookupService();
         $this->fileHashLookup = new FileHashLookupService();
         $this->revisionLookup = new RevisionLookupService();
+        $this->versionRangeService = new VersionRangeService();
         $this->githubApi = new GithubApi();
     }
 
@@ -72,7 +65,6 @@ class ScannerService
      */
     public function scan(ScannerServiceCallbackInterface $callback): void
     {
-        $this->versionRanges = [];
         $this->padId = 'test' . rand(1, 99999);
 
         $this->scanBaseUrl($callback);
@@ -161,7 +153,7 @@ class ScannerService
 
                 $commit = $this->githubApi->getCommit($revision);
                 if ($commit !== null) {
-                    $this->revisionVersion = $this->revisionLookup->getVersion($commit['sha']);
+                    $this->versionRangeService->setRevisionVersion($this->revisionLookup->getVersion($commit['sha']));
                     $callback->onScanApiRevisionCommit($commit);
                 }
             }
@@ -178,7 +170,7 @@ class ScannerService
                 $versionRange = $this->versionLookup->getEtherpadVersionRange($apiVersion);
                 $this->apiVersion = $apiVersion;
                 $callback->onScanApiVersion($apiVersion);
-                $this->versionRanges[] = $versionRange;
+                $this->versionRangeService->addVersionRange($versionRange);
             } catch (JsonException $e) {
                 $callback->onScanApiException($e);
             }
@@ -207,7 +199,7 @@ class ScannerService
             $callback->onScanPadException($e);
         }
 
-        $versionRange = $this->calculateVersion();
+        $versionRange = $this->versionRangeService->calculateVersion();
 
         $socketIoVersion = ElephantClient::CLIENT_2X;
         if (version_compare($this->apiVersion ?? '999', '1.2.13', '<=')) {
@@ -264,54 +256,19 @@ class ScannerService
         foreach (FileHashLookupService::getFileNames() as $file) {
             $hash = $this->getFileHash($file);
             $versionRange = $this->fileHashLookup->getEtherpadVersionRange($file, $hash);
-            $this->versionRanges[] = $versionRange;
+            $this->versionRangeService->addVersionRange($versionRange);
         }
     }
 
     private function progressVersionRanges(ScannerServiceCallbackInterface $callback): void
     {
-        $versionRange = $this->calculateVersion();
+        $versionRange = $this->versionRangeService->calculateVersion();
 
         if ($versionRange === null) {
             throw new EtherpadServiceNotFoundException('No version information found');
         }
 
         $callback->onVersionResult($versionRange->getMinVersion(), $versionRange->getMaxVersion());
-    }
-
-    private function calculateVersion(): ?VersionRange
-    {
-        if ($this->packageVersion !== null) {
-            return new VersionRange($this->packageVersion, $this->packageVersion);
-        }
-
-        if ($this->healthVersion !== null) {
-            return new VersionRange($this->healthVersion, $this->healthVersion);
-        }
-
-        if ($this->revisionVersion !== null) {
-            return new VersionRange($this->revisionVersion, $this->revisionVersion);
-        }
-
-        $this->versionRanges = array_filter($this->versionRanges);
-
-        if (count($this->versionRanges) === 0) {
-            return null;
-        }
-
-        $maxVersion = null;
-        $minVersion = null;
-        foreach ($this->versionRanges as $version) {
-            if ($maxVersion === null || version_compare($version->getMaxVersion() ?? '', $maxVersion, '<')) {
-                $maxVersion = $version->getMaxVersion();
-            }
-
-            if ($minVersion === null || version_compare($version->getMinVersion() ?? '', $minVersion, '>')) {
-                $minVersion = $version->getMinVersion();
-            }
-        }
-
-        return new VersionRange($minVersion, $maxVersion);
     }
 
     private function getFileHash(string $path): ?string
@@ -344,7 +301,7 @@ class ScannerService
             $response = $this->client->get($this->baseUrl . 'health');
             $healthData = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
             $callback->onHealthResult($healthData);
-            $this->healthVersion = $healthData['releaseId'];
+            $this->versionRangeService->setHealthVersion($healthData['releaseId']);
         } catch (GuzzleException|JsonException $e) {
             $callback->onHealthException($e);
         }
@@ -397,7 +354,7 @@ class ScannerService
                 $onlyPlugins = $data['data']['plugins']['plugins'];
                 unset($onlyPlugins['ep_etherpad-lite']);
 
-                $this->packageVersion = $version;
+                $this->versionRangeService->setPackageVersion($version);
                 $callback->onClientVars($version, $result->data);
                 $callback->onScanPluginsList($onlyPlugins);
                 $callback->onScanPadSuccess();
