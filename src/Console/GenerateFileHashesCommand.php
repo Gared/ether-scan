@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Console;
 
-use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Service\FileHashLookupService;
-use Gared\EtherScan\Service\RevisionLookupService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Attribute\AsCommand;
