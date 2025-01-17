@@ -178,7 +178,7 @@ jobs:
             expected_result: PASSED
 
   Etherpad14:
-    name: Source [1.4.1]
+    name: Source [1.5.0]
     runs-on: ubuntu-latest
     steps:
       - name: Clone etherpad repository
@@ -186,7 +186,7 @@ jobs:
         with:
           repository: ether/etherpad-lite
           path: etherpad
-          ref: 1.4.1
+          ref: 1.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: "0.10"
