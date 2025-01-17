@@ -177,6 +177,54 @@ jobs:
             contains: "Package version: 1.9.7"
             expected_result: PASSED
 
+  Etherpad17:
+    name: Source [1.7.0]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone etherpad repository
+        uses: actions/checkout@v4
+        with:
+          repository: ether/etherpad-lite
+          path: etherpad
+          ref: 1.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "8.9"
+      - uses: JarvusInnovations/background-action@v1
+        name: Start etherpad service
+        with:
+          run: bin/run.sh &
+          wait-on: |
+            http://localhost:9001
+          log-output-if: failure
+          wait-for: 5m
+          working-directory: etherpad
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./app
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
+        with:
+          command_line: app/bin/console.php ether:scan http://localhost:9001
+          contains: "Package version: 1.7.0"
+          expected_result: PASSED
+
   EtherpadWithPlugins:
     name: Source [develop] with plugins
     runs-on: ubuntu-latest
