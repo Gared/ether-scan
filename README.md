@@ -18,7 +18,7 @@ You can try this tool out on the https://scanner.etherpad.org which is using thi
 
 ## Requirements
 
-You need PHP 8.1 or higher to run this tool.
+You need PHP 8.2 or higher to run this tool.
 
 ## Usage
 
@@ -45,36 +45,36 @@ bin/console.php ether:scan http://localhost:9001
 Starting scan of api...
 =======================
 
- [INFO] No revision in server header                                                                                    
+ [INFO] No revision in server header
 
- [INFO] api version: 1.3.0                                                                                              
+ [INFO] api version: 1.3.0
 
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 1.9.7                                                                                          
+ [INFO] Package version: 1.9.7
 
- [OK] Pads are publicly accessible                                                                                      
+ [OK] Pads are publicly accessible
 
- [OK] Server is healthy                                                                                                 
+ [OK] Server is healthy
 
- [INFO] Version is 1.9.7                                                                                                
+ [INFO] Version is 1.9.7
 
- [INFO] Server running since: 2024-03-08T21:38:56+00:00                                                                 
+ [INFO] Server running since: 2024-03-08T21:38:56+00:00
 
 Starting scan of admin area...
 ==============================
 
- [OK] Admin area is not accessible with admin / admin                                                                   
+ [OK] Admin area is not accessible with admin / admin
 
- [OK] Admin area is not accessible with admin / changeme1                                                               
+ [OK] Admin area is not accessible with admin / changeme1
 
- [OK] Admin area is not accessible with user / changeme1                                                                
+ [OK] Admin area is not accessible with user / changeme1
 
 Starting scan of plugins...
 ===========================
 
- [INFO] No plugins found                                                                                                
+ [INFO] No plugins found
 ```
 
 ### Composer
