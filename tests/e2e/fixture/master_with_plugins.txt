@@ -20,6 +20,8 @@ Plugins:
 
  [OK] Pads are publicly accessible
 
+ [OK] Websocket is supported
+
  [OK] Server is healthy
 
 
