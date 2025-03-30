@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use ElephantIO\Client as ElephantClient;
+use ElephantIO\Engine\SocketIO;
 use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
@@ -337,6 +338,10 @@ class ScannerService
             'password' => null,
             'protocolVersion' => 2,
         ]);
+        $engine = $socketIoClient->getEngine();
+        if ($engine instanceof SocketIO === false) {
+            throw new Exception('Engine of unsupported class');
+        }
 
         while ($result = $socketIoClient->wait('message', 2)) {
             if (is_array($result->data)) {
@@ -357,7 +362,7 @@ class ScannerService
                 $this->versionRangeService->setPackageVersion($version);
                 $callback->onClientVars($version, $result->data);
                 $callback->onScanPluginsList($onlyPlugins);
-                $callback->onScanPadSuccess();
+                $callback->onScanPadSuccess($engine->getTransport() === SocketIO::TRANSPORT_WEBSOCKET);
                 break;
             }
         }
