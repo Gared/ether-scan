@@ -1,7 +1,11 @@
-FROM composer/composer:2-bin AS composer
-COPY . /app
-RUN composer install --no-dev -o
-
 FROM php:8.4-cli AS php-cli
-COPY --from=composer /app /app
 WORKDIR /app
+
+COPY --from=composer/composer:2-bin /composer /usr/bin/composer
+
+RUN apt-get update \
+    && apt-get install -y zip unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+RUN composer install --no-dev -o && rm /usr/bin/composer
