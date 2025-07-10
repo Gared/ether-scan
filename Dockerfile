@@ -1,4 +1,4 @@
-FROM composer:2 AS composer
+FROM composer/composer:2-bin AS composer
 COPY . /app
 RUN composer install --no-dev -o
 
