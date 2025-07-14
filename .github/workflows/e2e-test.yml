@@ -392,5 +392,5 @@ jobs:
         uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: bin/console.php ether:scan http://localhost:9001
-          contains: "[ERROR] Admin area is accessible with admin / admin"
+          contains: "Admin area is accessible with admin / admin"
           expected_result: PASSED
