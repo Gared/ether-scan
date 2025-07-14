@@ -225,11 +225,11 @@ class ScannerService
     private function getAdmin(string $user, string $password, ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $this->client->get($this->baseUrl . 'admin', [
+            $response = $this->client->post($this->baseUrl . 'admin-auth/', [
                 'auth' => [$user, $password],
             ]);
-            if ($response->getStatusCode() === 301) {
-                $response = $this->client->post($this->baseUrl . 'admin-auth/', [
+            if ($response->getStatusCode() !== 200) {
+                $response = $this->client->get($this->baseUrl . 'admin/', [
                     'auth' => [$user, $password],
                 ]);
             }
