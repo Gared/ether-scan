@@ -353,7 +353,7 @@ jobs:
           expected_result: PASSED
 
   EtherpadAdminLogin:
-    name: Docker [${{ matrix.versions.tag }}]
+    name: Docker admin login [${{ matrix.versions.tag }}]
     runs-on: ubuntu-latest
     needs: DynamicVersionMatrix
 
