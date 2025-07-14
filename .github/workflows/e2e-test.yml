@@ -351,3 +351,47 @@ jobs:
           command_line: bin/console.php ether:scan http://localhost:9001
           contains: "Package version: ${{ matrix.versions.expected }}"
           expected_result: PASSED
+
+  EtherpadAdminLogin:
+    name: Docker admin login [${{ matrix.versions.tag }}]
+    runs-on: ubuntu-latest
+
+    services:
+      etherpad:
+        image: etherpad/etherpad:${{ matrix.versions.tag }}
+        env:
+          ADMIN_PASSWORD: admin
+        ports:
+          - 9001:9001
+
+    strategy:
+      matrix:
+        versions: [
+          { tag: "2.3.2" },
+          { tag: "2.2.2" },
+          { tag: "1.9.7" },
+          { tag: "1.8.0" },
+        ]
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Scan etherpad instance
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
+        with:
+          command_line: bin/console.php ether:scan http://localhost:9001
+          contains: "Admin area is accessible with admin / admin"
+          expected_result: PASSED
