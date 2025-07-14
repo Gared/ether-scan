@@ -360,6 +360,8 @@ jobs:
     services:
       etherpad:
         image: etherpad/etherpad:${{ matrix.versions.tag }}
+        env:
+          ADMIN_PASSWORD: admin
         ports:
           - 9001:9001
 
@@ -387,10 +389,6 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-
-      - name: Create settings.json
-        run: |
-          echo '{"users": {"admin": {"password": "admin", "is_admin": true}}}' > settings.json
 
       - name: Scan etherpad instance
         uses: GuillaumeFalourd/assert-command-line-output@v2.4
