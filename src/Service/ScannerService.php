@@ -228,13 +228,21 @@ class ScannerService
             $response = $this->client->post($this->baseUrl . 'admin-auth/', [
                 'auth' => [$user, $password],
             ]);
-            if ($response->getStatusCode() !== 200) {
-                $response = $this->client->get($this->baseUrl . 'admin/', [
-                    'auth' => [$user, $password],
-                ]);
-            }
-
             $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200);
+            return;
+        } catch (GuzzleException $e) {
+            if ($e->getCode() === 401) {
+                $callback->onScanAdminResult($user, $password, false);
+                return;
+            }
+        }
+
+        try {
+            $response = $this->client->get($this->baseUrl . 'admin/', [
+                'auth' => [$user, $password],
+            ]);
+            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200);
+            return;
         } catch (GuzzleException) {
             $callback->onScanAdminResult($user, $password, false);
         }
