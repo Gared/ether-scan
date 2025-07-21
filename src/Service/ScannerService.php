@@ -228,10 +228,11 @@ class ScannerService
             $response = $this->client->post($this->baseUrl . 'admin-auth/', [
                 'auth' => [$user, $password],
             ]);
-            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200);
+            $body = (string) $response->getBody();
+            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200 && $body === 'Authorized');
             return;
         } catch (GuzzleException $e) {
-            if ($e->getCode() === 401) {
+            if ($e->getCode() === 401 || $e->getCode() === 403) {
                 $callback->onScanAdminResult($user, $password, false);
                 return;
             }
@@ -241,7 +242,8 @@ class ScannerService
             $response = $this->client->get($this->baseUrl . 'admin/', [
                 'auth' => [$user, $password],
             ]);
-            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200);
+            $body = (string) $response->getBody();
+            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200 && str_contains($body, 'Plugin manager'));
             return;
         } catch (GuzzleException) {
             $callback->onScanAdminResult($user, $password, false);
