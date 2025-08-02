@@ -91,6 +91,7 @@ class CheckFileHashesCommand extends Command
             $client = new Client([
                 'base_uri' => $url,
                 'timeout' => 5.0,
+                'verify' => false,
             ]);
             $response = $client->get($path, [
                 'headers' => ['Accept-Encoding' => 'gzip'],

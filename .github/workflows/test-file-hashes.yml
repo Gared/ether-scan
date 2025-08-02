@@ -13,6 +13,7 @@ jobs:
     outputs:
       matrix: '[
           { tag: "${{ steps.etherpad-version-cleaned.outputs.version }}", expected: "${{ steps.etherpad-version-cleaned.outputs.version }}" },
+          { tag: "2.3.2", expected: "2.3.2" },
           { tag: "2.3.0", expected: "2.3.0" },
           { tag: "2.2.7", expected: "2.2.7" },
           { tag: "2.2.2", expected: "2.2.2" },
@@ -67,6 +68,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Wait for etherpad service to be ready
+        run: timeout 30 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9001)" != "200" ]]; do sleep 5; done' || false
 
       - name: Scan etherpad instance for file hashes
         run: bin/console.php ether:check-file-hashes http://localhost:9001 ${{ matrix.versions.expected }}
