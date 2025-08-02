@@ -78,7 +78,8 @@ class FileHashLookupService
             '169c79ec1a44c5c45dfce64c0f62c7ef' => [null, '1.9.7'],
             '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
             '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
-            '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', null],
+            '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
+            '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', null],
         ],
     ];
 
