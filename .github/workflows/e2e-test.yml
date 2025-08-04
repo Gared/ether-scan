@@ -16,6 +16,7 @@ jobs:
       matrix: '[
           { tag: "develop", expected: "${{ steps.etherpad-version-cleaned.outputs.version }}" },
           { tag: "${{ steps.etherpad-version-cleaned.outputs.version }}", expected: "${{ steps.etherpad-version-cleaned.outputs.version }}" },
+          { tag: "2.2.7", expected: "2.2.7" },
           { tag: "2.1.0", expected: "2.1.0" },
           { tag: "2.0.2", expected: "2.0.2" },
           { tag: "2.0.0", expected: "2.0.0" },
