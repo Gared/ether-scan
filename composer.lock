@@ -4,30 +4,31 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6aa343067e450552b0aed9e0640897a1",
+    "content-hash": "c77d933ee28e52056f50d1a19cf3b8e8",
     "packages": [
         {
             "name": "elephantio/elephant.io",
-            "version": "v4.13.1",
+            "version": "v5.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElephantIO/elephant.io.git",
-                "reference": "db7c95e32db45b670b7c0cacf021fe6e3aa9da35"
+                "reference": "c5f4c3044ff0b89f88fb5efe497d38002d6421b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/db7c95e32db45b670b7c0cacf021fe6e3aa9da35",
-                "reference": "db7c95e32db45b670b7c0cacf021fe6e3aa9da35",
+                "url": "https://api.github.com/repos/ElephantIO/elephant.io/zipball/c5f4c3044ff0b89f88fb5efe497d38002d6421b2",
+                "reference": "c5f4c3044ff0b89f88fb5efe497d38002d6421b2",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=7.2",
+                "php": ">=7.4",
                 "psr/log": "^1.1 || ^3.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.0",
                 "monolog/monolog": "^2.8 || ^3.0",
+                "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^8.5 || ^9.5"
             },
             "type": "library",
@@ -78,9 +79,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ElephantIO/elephant.io/issues",
-                "source": "https://github.com/ElephantIO/elephant.io/tree/v4.13.1"
+                "source": "https://github.com/ElephantIO/elephant.io/tree/v5.0.2"
             },
-            "time": "2025-05-06T01:55:18+00:00"
+            "time": "2025-10-23T06:02:33+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
