@@ -84,8 +84,7 @@ class FileHashLookupService
         'static/skins/colibris/index.js' => [
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
             '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
-            'd11af9dc26b766206e094627884763f3' => ['2.4.2', '2.5.1'],
-            '7ca9d33706097224f2fa2724472d1fcf' => ['2.5.3', null],
+            'd11af9dc26b766206e094627884763f3' => ['2.4.2', null],
         ],
     ];
 
