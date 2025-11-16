@@ -13,6 +13,7 @@ jobs:
     outputs:
       matrix: '[
           { tag: "${{ steps.etherpad-version-cleaned.outputs.version }}", expected: "${{ steps.etherpad-version-cleaned.outputs.version }}" },
+          { tag: "2.4.2", expected: "2.4.2" },
           { tag: "2.3.2", expected: "2.3.2" },
           { tag: "2.3.0", expected: "2.3.0" },
           { tag: "2.2.7", expected: "2.2.7" },
