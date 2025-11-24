@@ -1,4 +1,4 @@
-FROM php:8.4-cli AS php-cli
+FROM php:8.5-cli AS php-cli
 WORKDIR /app
 
 COPY --from=composer/composer:2-bin /composer /usr/bin/composer
