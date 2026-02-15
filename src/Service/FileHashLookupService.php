@@ -99,6 +99,10 @@ class FileHashLookupService
 
     public function getEtherpadVersionRange(string $fileName, ?string $hash): ?VersionRange
     {
+        if ($hash === null) {
+            return null;
+        }
+
         $versionRange = self::FILE_HASH_VERSIONS[$fileName][$hash] ?? null;
         if ($versionRange !== null) {
             return new VersionRange(
