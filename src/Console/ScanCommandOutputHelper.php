@@ -6,6 +6,7 @@ namespace Gared\EtherScan\Console;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
+use Gared\EtherScan\Service\Scanner\Health\HealthResponseException;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
@@ -107,7 +108,7 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->error('Health: ' . print_r($data, true));
     }
 
-    public function onHealthException(GuzzleException|JsonException $e): void
+    public function onHealthException(HealthResponseException $e): void
     {
         $this->symfonyStyle->error($e->getMessage());
     }
