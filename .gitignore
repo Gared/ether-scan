@@ -1,4 +1,5 @@
 composer.phar
+.phpunit.cache/
 
 .idea/
 vendor/

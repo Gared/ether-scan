@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use Exception;
+use Gared\EtherScan\Service\Scanner\Health\HealthResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
@@ -44,7 +45,7 @@ interface ScannerServiceCallbackInterface
      */
     public function onHealthResult(array $data): void;
 
-    public function onHealthException(GuzzleException|JsonException $e): void;
+    public function onHealthException(HealthResponseException $e): void;
 
     public function onScanAdminStart(): void;
 
