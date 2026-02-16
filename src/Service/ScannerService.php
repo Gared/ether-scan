@@ -9,6 +9,7 @@ use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
+use Gared\EtherScan\Service\Scanner\Health\HealthScanner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
@@ -33,6 +34,7 @@ class ScannerService
     private ?string $pathPrefix = null;
     private ?string $apiVersion = null;
     private string $padId;
+    private HealthScanner $healthScanner;
 
     public function __construct(
         string $url,
@@ -59,6 +61,7 @@ class ScannerService
         $this->revisionLookup = new RevisionLookupService();
         $this->versionRangeService = new VersionRangeService();
         $this->githubApi = new GithubApi();
+        $this->healthScanner = new HealthScanner($this->versionRangeService);
     }
 
     /**
@@ -72,7 +75,7 @@ class ScannerService
         $this->scanApi($callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
-        $this->scanHealth($callback);
+        $this->healthScanner->scan($this->client, $this->baseUrl, $callback);
         $this->progressVersionRanges($callback);
         $this->scanStats($callback);
         $this->scanAdmin($callback);
@@ -306,17 +309,7 @@ class ScannerService
         }
     }
 
-    private function scanHealth(ScannerServiceCallbackInterface $callback): void
-    {
-        try {
-            $response = $this->client->get($this->baseUrl . 'health');
-            $healthData = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
-            $callback->onHealthResult($healthData);
-            $this->versionRangeService->setHealthVersion($healthData['releaseId']);
-        } catch (GuzzleException|JsonException $e) {
-            $callback->onHealthException($e);
-        }
-    }
+
 
     private function doSocketWebsocket(
         int $socketIoVersion,
