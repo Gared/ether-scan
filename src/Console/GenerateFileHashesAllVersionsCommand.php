@@ -100,6 +100,9 @@ class GenerateFileHashesAllVersionsCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @param list<array{name: string, scan: array<mixed>}> $allInstances
+     */
     private function scanVersionInstances(array $allInstances, string $version, string $file, InstanceResults $instanceResults, OutputInterface $output, int $countVersionsMatchNeeded): void
     {
         $foundMatchesForHash = [];
@@ -145,7 +148,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
     private function matches(InstanceResults $instanceResults, InstanceResult $instanceResult, string $version): bool
     {
         foreach ($instanceResults->getInstancesForVersion($version) as $instance) {
-            if ($instance?->fileHash === $instanceResult->fileHash) {
+            if ($instance->fileHash === $instanceResult->fileHash) {
                 return true;
             }
         }
@@ -154,9 +157,9 @@ class GenerateFileHashesAllVersionsCommand extends Command
     }
 
     /**
-     * @param list<array{name: string, scan: array}> $instances
+     * @param list<array{name: string, scan: array<mixed>}> $instances
      * @param string $version
-     * @return list<array{name: string, scan: array}>
+     * @return list<array{name: string, scan: array<mixed>}>
      */
     private function getInstancesByVersion(array $instances, string $version): array
     {
@@ -170,6 +173,10 @@ class GenerateFileHashesAllVersionsCommand extends Command
         return $filteredInstances;
     }
 
+    /**
+     * @param list<array{name: string, scan: array<mixed>}> $instances
+     * @return list<string>
+     */
     private function getAllVersions(array $instances): array
     {
         $versions = [];
@@ -184,7 +191,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
     }
 
     /**
-     * @return list<array{name: string, scan: array}>
+     * @return list<array{name: string, scan: array<mixed>}>
      */
     private function getInstances(): array
     {
