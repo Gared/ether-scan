@@ -116,7 +116,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
             $instanceResult = new InstanceResult($instance['name'], $version, $fileHash, $fileContent);
             $instanceResults->add($instanceResult);
 
-            if ($fileHash === null) {
+            if ($instanceResult->fileHash === null) {
                 $output->writeln('<error>Could not get hash for instance ' . $instance['name'] . '</error>', OutputInterface::VERBOSITY_VERY_VERBOSE);
 
                 if ($scannedInstances > 4 && count($foundMatchesForHash) === 0) {
