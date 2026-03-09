@@ -10,7 +10,7 @@ class FileHashLookupService
     /**
      * @var array<string, array<string, array<string|null>>>
      */
-    private const FILE_HASH_VERSIONS = [
+    private const array FILE_HASH_VERSIONS = [
         'static/js/AttributePool.js' => [
             '4edf12f374e005bfa7d0fc6681caa67f' => [null, '1.8.0'],
             '64ac4ec21f716d36d37a4b1a9aa0debe' => ['1.8.3', '1.8.4'],
@@ -71,15 +71,15 @@ class FileHashLookupService
             'fc1965c84113e78fb5b29b68c8fc84f8' => ['1.9.1', '1.9.1'],
             'e1d8c5fc1e4fcfe28b527828543a4729' => ['1.9.2', '2.1.0'],
             '96fd880e3e348fe4b45170b7c750a0b1' => ['2.1.1', '2.1.1'],
-            'a9aa5b16c8e3ff79933156220cb87dbf' => ['2.2.2', null],
+            'a9aa5b16c8e3ff79933156220cb87dbf' => ['2.2.2', '2.2.2'],
         ],
         'static/css/pad.css' => [
             '169c79ec1a44c5c45dfce64c0f62c7ef' => [null, '1.9.7'],
             '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
             '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
             '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
-            '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', '2.5.0'],
-            '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.1', null],
+            '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', '2.5.1'],
+            '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', null],
         ],
         'static/skins/colibris/index.js' => [
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
