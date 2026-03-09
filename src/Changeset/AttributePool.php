@@ -105,13 +105,18 @@ class AttributePool
     }
 
     /**
-     * @return array{numToAttrib: array<int, array{0: string, 1: string}>, nextNum: int}
-     *     An object suitable for serialization that can be passed to fromJsonable to reconstruct the pool.
+     * Returns a representation suitable for JSON encoding for the wire protocol.
+     *
+     * The `numToAttrib` field is returned as a \stdClass so that json_encode() serializes it as a
+     * JSON object ({}) rather than a JSON array ([]), which is required by the Etherpad protocol
+     * even when the pool is empty.
+     *
+     * @return array{numToAttrib: \stdClass, nextNum: int}
      */
     public function toJsonable(): array
     {
         return [
-            'numToAttrib' => $this->numToAttrib,
+            'numToAttrib' => (object) $this->numToAttrib,
             'nextNum' => $this->nextNum,
         ];
     }
@@ -119,11 +124,19 @@ class AttributePool
     /**
      * Replace the contents of this attribute pool with values from a previous call to toJsonable.
      *
-     * @param array{numToAttrib: array<int, array{0: string, 1: string}>, nextNum: int} $obj
+     * The `numToAttrib` value may be either a PHP array (from internal round-tripping) or a
+     * \stdClass instance (returned by toJsonable() or by json_decode without the assoc flag).
+     * Both forms are accepted and handled transparently.
+     *
+     * @param array{numToAttrib: array<int, array{0: string, 1: string}>|\stdClass, nextNum: int} $obj
      */
     public function fromJsonable(array $obj): self
     {
-        $this->numToAttrib = $obj['numToAttrib'];
+        // Accept both \stdClass (from toJsonable()) and plain array (from json_decode with assoc=true)
+        $raw = $obj['numToAttrib'];
+        /** @var array<int, array{0: string, 1: string}> $numToAttrib */
+        $numToAttrib = $raw instanceof \stdClass ? (array) $raw : $raw;
+        $this->numToAttrib = $numToAttrib;
         $this->nextNum = $obj['nextNum'];
         $this->attribToNum = [];
         foreach ($this->numToAttrib as $n => $attrib) {

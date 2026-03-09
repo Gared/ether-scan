@@ -321,7 +321,10 @@ class ChangesetTest extends TestCase
         self::assertArrayHasKey('numToAttrib', $json);
         self::assertArrayHasKey('nextNum', $json);
         self::assertSame(2, $json['nextNum']);
+        // numToAttrib must be a stdClass (JSON object) for correct wire protocol serialization
+        self::assertInstanceOf(\stdClass::class, $json['numToAttrib']);
 
+        // fromJsonable accepts the result of toJsonable() directly (no manual cast needed)
         $pool2 = new AttributePool();
         $pool2->fromJsonable($json);
         self::assertSame(['bold', 'true'], $pool2->getAttrib(0));
