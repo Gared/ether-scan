@@ -18,7 +18,7 @@ You can try this tool out on the https://scanner.etherpad.org which is using thi
 
 ## Requirements
 
-You need PHP 8.2 or higher to run this tool.
+You need PHP 8.3 or higher to run this tool.
 
 ## Usage
 

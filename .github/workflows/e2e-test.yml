@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Start docker containers
         run: |
@@ -50,7 +50,7 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Start docker containers
         run: |
@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -123,7 +123,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Start docker containers
         run: |
@@ -131,7 +131,7 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -   name: Checkout repository
-          uses: actions/checkout@v5
+          uses: actions/checkout@v6
 
       -   name: Start docker containers
           run: |
@@ -161,7 +161,7 @@ jobs:
 
       -   name: Cache Composer packages
           id: composer-cache
-          uses: actions/cache@v4
+          uses: actions/cache@v5
           with:
             path: vendor
             key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -183,12 +183,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone etherpad repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ether/etherpad-lite
           path: etherpad
           ref: 1.7.0
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: "8.9"
       - uses: JarvusInnovations/background-action@v1
@@ -202,13 +202,13 @@ jobs:
           working-directory: etherpad
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: app
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -231,13 +231,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: ether/etherpad-lite
         path: etherpad
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
-        node-version: 20
+        node-version: 24
     - uses: JarvusInnovations/background-action@v1
       name: Start etherpad service
       with:
@@ -253,13 +253,13 @@ jobs:
         working-directory: etherpad
 
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         path: app
 
     - name: Cache Composer packages
       id: composer-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: vendor
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -290,11 +290,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -332,11 +332,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -376,11 +376,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}

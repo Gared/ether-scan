@@ -84,7 +84,8 @@ class FileHashLookupService
         'static/skins/colibris/index.js' => [
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
             '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
-            'd11af9dc26b766206e094627884763f3' => ['2.4.2', null],
+            'd11af9dc26b766206e094627884763f3' => ['2.4.2', '2.5.3'],
+            '0c33c52671cde06391b20a1c868d643b' => ['2.6.0', null],
         ],
     ];
 
@@ -98,6 +99,10 @@ class FileHashLookupService
 
     public function getEtherpadVersionRange(string $fileName, ?string $hash): ?VersionRange
     {
+        if ($hash === null) {
+            return null;
+        }
+
         $versionRange = self::FILE_HASH_VERSIONS[$fileName][$hash] ?? null;
         if ($versionRange !== null) {
             return new VersionRange(
