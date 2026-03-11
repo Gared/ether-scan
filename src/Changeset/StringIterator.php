@@ -23,7 +23,7 @@ class StringIterator
 
     public function remaining(): int
     {
-        return strlen($this->str) - $this->curIndex;
+        return mb_strlen($this->str, 'UTF-8') - $this->curIndex;
     }
 
     public function getNewLines(): int
@@ -41,7 +41,7 @@ class StringIterator
     public function take(int $n): string
     {
         $this->assertRemaining($n);
-        $s = substr($this->str, $this->curIndex, $n);
+        $s = mb_substr($this->str, $this->curIndex, $n, 'UTF-8');
         $this->newLines -= substr_count($s, "\n");
         $this->curIndex += $n;
         return $s;
@@ -50,13 +50,13 @@ class StringIterator
     public function peek(int $n): string
     {
         $this->assertRemaining($n);
-        return substr($this->str, $this->curIndex, $n);
+        return mb_substr($this->str, $this->curIndex, $n, 'UTF-8');
     }
 
     public function skip(int $n): void
     {
         $this->assertRemaining($n);
-        $skipped = substr($this->str, $this->curIndex, $n);
+        $skipped = mb_substr($this->str, $this->curIndex, $n, 'UTF-8');
         $this->newLines -= substr_count($skipped, "\n");
         $this->curIndex += $n;
     }

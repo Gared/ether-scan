@@ -138,21 +138,20 @@ class Changeset
     {
         $op = new Op($opcode);
         $op->attribs = $attribs;
-        $lastNewlinePos = strrpos($text, "\n");
+        $lastNewlinePos = mb_strrpos($text, "\n", 0, 'UTF-8');
         if ($lastNewlinePos === false) {
-            $op->chars = strlen($text);
+            $op->chars = mb_strlen($text, 'UTF-8');
             $op->lines = 0;
             if ($op->chars > 0) {
                 yield $op;
             }
         } else {
+            // $lastNewlinePos is always >= 0 here, so chars = $lastNewlinePos + 1 >= 1 > 0; safe to yield unconditionally.
             $op->chars = $lastNewlinePos + 1;
             $op->lines = substr_count($text, "\n");
-            if ($op->chars > 0) {
-                yield $op;
-            }
+            yield $op;
             $op2 = self::copyOp($op);
-            $op2->chars = strlen($text) - ($lastNewlinePos + 1);
+            $op2->chars = mb_strlen($text, 'UTF-8') - ($lastNewlinePos + 1);
             $op2->lines = 0;
             if ($op2->chars > 0) {
                 yield $op2;
@@ -240,8 +239,8 @@ class Changeset
     {
         $unpacked = self::unpack($cs);
         self::assert(
-            strlen($str) === $unpacked['oldLen'],
-            'mismatched apply: ' . strlen($str) . ' / ' . $unpacked['oldLen']
+            mb_strlen($str, 'UTF-8') === $unpacked['oldLen'],
+            'mismatched apply: ' . mb_strlen($str, 'UTF-8') . ' / ' . $unpacked['oldLen']
         );
         $bankIter = new StringIterator($unpacked['charBank']);
         $strIter = new StringIterator($str);
@@ -297,15 +296,16 @@ class Changeset
         if ($ndel < 0) {
             throw new \RangeException("characters to delete must be non-negative (is {$ndel})");
         }
-        if ($start > strlen($orig)) {
-            $start = strlen($orig);
+        $origLen = mb_strlen($orig, 'UTF-8');
+        if ($start > $origLen) {
+            $start = $origLen;
         }
-        if ($ndel > strlen($orig) - $start) {
-            $ndel = strlen($orig) - $start;
+        if ($ndel > $origLen - $start) {
+            $ndel = $origLen - $start;
         }
-        $deleted = substr($orig, $start, $ndel);
+        $deleted = mb_substr($orig, $start, $ndel, 'UTF-8');
         $assem = new SmartOpAssembler();
-        foreach (self::opsFromText('=', substr($orig, 0, $start)) as $op) {
+        foreach (self::opsFromText('=', mb_substr($orig, 0, $start, 'UTF-8')) as $op) {
             $assem->append($op);
         }
         foreach (self::opsFromText('-', $deleted) as $op) {
@@ -315,7 +315,7 @@ class Changeset
             $assem->append($op);
         }
         $assem->endDocument();
-        return self::pack(strlen($orig), strlen($orig) + strlen($ins) - $ndel, (string) $assem, $ins);
+        return self::pack($origLen, $origLen + mb_strlen($ins, 'UTF-8') - $ndel, (string) $assem, $ins);
     }
 
     /**

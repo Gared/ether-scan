@@ -183,13 +183,13 @@ echo "\n[4/4] Building and sending changeset...\n";
 // We want to insert "Hello world" in the middle of the textual content
 // (i.e., halfway through the characters, not counting the final newline).
 
-$textLength = strlen($currentText); // includes trailing "\n"
+$textLength = mb_strlen($currentText, 'UTF-8'); // character count (not bytes)
 
 // Find the insertion point: middle of the text (before the trailing newline)
 $contentLength    = max(0, $textLength - 1); // exclude trailing "\n"
 $insertionPoint   = (int) ($contentLength / 2);
 
-echo "      Text length      : {$textLength} chars\n";
+echo "      Text length      : {$textLength} characters\n";
 echo "      Insertion point  : position {$insertionPoint}\n";
 
 // Reconstruct the server's attribute pool so we can pass it to moveOpsToNewPool if needed.

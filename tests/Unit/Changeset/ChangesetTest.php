@@ -119,6 +119,37 @@ class ChangesetTest extends TestCase
         self::assertSame("Line1\nReplaced\n", $result);
     }
 
+    public function testMakeSpliceMultibyteInsert(): void
+    {
+        // Pad text with accented characters (2-byte UTF-8 sequences)
+        $orig = "café\n"; // 4 Unicode chars + newline = 5 chars, 6 UTF-8 bytes
+        $cs = Changeset::makeSplice($orig, 4, 0, ' au lait'); // insert after "café"
+        // oldLen must be 5 (characters), not 6 (bytes)
+        self::assertStringStartsWith('Z:5>', $cs);
+        $result = Changeset::applyToText($cs, $orig);
+        self::assertSame("café au lait\n", $result);
+    }
+
+    public function testMakeSpliceMultibyteDelete(): void
+    {
+        $orig = "café\n"; // 5 chars
+        $cs = Changeset::makeSplice($orig, 0, 4, 'tea'); // replace "café" with "tea"
+        self::assertSame("tea\n", Changeset::applyToText($cs, $orig));
+    }
+
+    public function testMakeSpliceMultibyteMiddleInsertion(): void
+    {
+        // Text with a 2-byte UTF-8 character (é): strlen("héllo world\n") = 13 bytes, but 12 Unicode chars
+        $orig = "héllo world\n"; // 12 Unicode chars (é = U+00E9, 2-byte UTF-8)
+        $midPoint = 6; // character 6 ("w" of "world")
+        $cs = Changeset::makeSplice($orig, $midPoint, 0, 'PHP ');
+        $result = Changeset::applyToText($cs, $orig);
+        self::assertSame("héllo PHP world\n", $result);
+        // oldLen must match Unicode character count, not byte count
+        $unpacked = Changeset::unpack($cs);
+        self::assertSame(mb_strlen($orig, 'UTF-8'), $unpacked['oldLen']);
+    }
+
     public function testApplyToTextKeep(): void
     {
         $cs = Changeset::identity(5);
