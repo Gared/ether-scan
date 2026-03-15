@@ -230,11 +230,16 @@ jobs:
         working-directory: ./app
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.4
-        with:
-          command_line: app/bin/console.php ether:scan http://localhost:9001
-          contains: "Package version: 1.7.0"
-          expected_result: PASSED
+        run: |
+          set -euo pipefail
+          output="$(bin/console.php ether:scan http://localhost:9001)"
+          echo "$output"
+
+          expected="Package version: 1.7.1"
+          if ! grep -Fq "$expected" <<< "$output"; then
+            echo "Assertion failed: expected output to contain: $expected"
+            exit 1
+          fi
 
   EtherpadWithPlugins:
     name: Source [develop] with plugins
