@@ -301,7 +301,7 @@ jobs:
           | grep -v "Server running since" \
           | cut -d'@' -f1 > /tmp/actual.txt
 
-        diff -u tests/e2e/fixture/master_with_plugins.txt /tmp/actual.txt
+        diff -u app/tests/e2e/fixture/master_with_plugins.txt /tmp/actual.txt
 
   LatestEtherpad:
     name: Docker [latest]
