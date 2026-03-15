@@ -232,7 +232,7 @@ jobs:
       - name: Scan etherpad instance
         run: |
           set -euo pipefail
-          output="$(bin/console.php ether:scan http://localhost:9001)"
+          output="$(app/bin/console.php ether:scan http://localhost:9001)"
           echo "$output"
 
           expected="Package version: 1.7.1"
