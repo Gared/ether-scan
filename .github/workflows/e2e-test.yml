@@ -142,11 +142,16 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Scan etherpad instance
-        uses: GuillaumeFalourd/assert-command-line-output@v2.4
-        with:
-          command_line: bin/console.php ether:scan http://localhost:8080/etherpad
-          contains: "Package version: ${{ matrix.versions.expected }}"
-          expected_result: PASSED
+        run: |
+          set -euo pipefail
+          output="$(bin/console.php ether:scan http://localhost:8080/etherpad)"
+          echo "$output"
+
+          expected="Package version: ${{ matrix.versions.expected }}"
+          if ! grep -Fq "$expected" <<< "$output"; then
+            echo "Assertion failed: expected output to contain: $expected"
+            exit 1
+          fi
 
   EtherpadWithNginxReverseProxyWithoutSubPath:
     name: Docker [1.9.7] + Nginx (without subpath)
@@ -172,11 +177,16 @@ jobs:
           run: composer install --prefer-dist --no-progress
 
       -   name: Scan etherpad instance
-          uses: GuillaumeFalourd/assert-command-line-output@v2.4
-          with:
-            command_line: bin/console.php ether:scan http://localhost:8080/test
-            contains: "Package version: 1.9.7"
-            expected_result: PASSED
+          run: |
+            set -euo pipefail
+            output="$(bin/console.php ether:scan http://localhost:8080/test)"
+            echo "$output"
+
+            expected="Package version: 1.9.7"
+            if ! grep -Fq "$expected" <<< "$output"; then
+              echo "Assertion failed: expected output to contain: $expected"
+              exit 1
+            fi
 
   Etherpad17:
     name: Source [1.7.0]
