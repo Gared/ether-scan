@@ -148,6 +148,13 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Wait until etherpad is healthy
+        run: |
+          until curl -s -f -o /dev/null "http://localhost:8080/etherpad"
+          do
+            sleep 2
+          done
+
       - name: Scan etherpad instance
         run: |
           set -euo pipefail
