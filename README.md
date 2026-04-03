@@ -42,8 +42,8 @@ bin/console.php ether:scan http://localhost:9001
 ```
 
 ```console
-Starting scan of api...
-=======================
+Starting scan of api: http://localhost:9001/
+============================================
 
  [INFO] No revision in server header
 
@@ -52,15 +52,19 @@ Starting scan of api...
 Starting scan of a pad...
 =========================
 
- [INFO] Package version: 1.9.7
+ [INFO] Package version: 2.6.1
+
+ [INFO] No plugins found
 
  [OK] Pads are publicly accessible
 
+ [OK] Websocket is supported
+
  [OK] Server is healthy
 
- [INFO] Version is 1.9.7
+ [INFO] Version is 2.6.1
 
- [INFO] Server running since: 2024-03-08T21:38:56+00:00
+ [INFO] Server running since: 2026-01-26T21:26:22+00:00
 
 Starting scan of admin area...
 ==============================
@@ -70,11 +74,6 @@ Starting scan of admin area...
  [OK] Admin area is not accessible with admin / changeme1
 
  [OK] Admin area is not accessible with user / changeme1
-
-Starting scan of plugins...
-===========================
-
- [INFO] No plugins found
 ```
 
 ### Composer
