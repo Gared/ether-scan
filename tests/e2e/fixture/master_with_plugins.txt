@@ -15,6 +15,7 @@ Plugins:
  * ep_font_size
  * ep_headings2
  * ep_markdown
+ * ep_plugin_helpers
  * ep_spellcheck
  * ep_table_of_contents
 
