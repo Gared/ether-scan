@@ -33,7 +33,7 @@ jobs:
           LATEST_TAG="$(curl -fsSL \
             -H 'Accept: application/vnd.github+json' \
             -H 'Authorization: Bearer ${{ github.token }}' \
-            https://api.github.com/repos/ether/etherpad-lite/releases/latest \
+            https://api.github.com/repos/ether/etherpad/releases/latest \
             | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'])")"
           CLEANED_VERSION="${LATEST_TAG#v}"
           echo "version=$CLEANED_VERSION" >> "$GITHUB_OUTPUT"
@@ -210,7 +210,7 @@ jobs:
       - name: Clone etherpad repository
         uses: actions/checkout@v6
         with:
-          repository: ether/etherpad-lite
+          repository: ether/etherpad
           path: etherpad
           ref: 1.7.0
       - uses: actions/setup-node@v6
@@ -263,7 +263,7 @@ jobs:
     - name: Clone etherpad repository
       uses: actions/checkout@v6
       with:
-        repository: ether/etherpad-lite
+        repository: ether/etherpad
         path: etherpad
     - uses: actions/setup-node@v6
       with:

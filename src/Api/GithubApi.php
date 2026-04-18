@@ -23,7 +23,7 @@ class GithubApi
     public function getCommit(string $commitHash): ?array
     {
         try {
-            $response = $this->client->get('/repos/ether/etherpad-lite/commits/' . $commitHash);
+            $response = $this->client->get('/repos/ether/etherpad/commits/' . $commitHash);
             $body = (string)$response->getBody();
             return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception) {
@@ -37,7 +37,7 @@ class GithubApi
     public function getTags(): ?array
     {
         try {
-            $response = $this->client->get('/repos/ether/etherpad-lite/tags?per_page=100');
+            $response = $this->client->get('/repos/ether/etherpad/tags?per_page=100');
             $body = (string)$response->getBody();
             return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception) {
