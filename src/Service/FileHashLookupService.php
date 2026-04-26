@@ -82,6 +82,12 @@ class FileHashLookupService
             '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', '2.6.1'],
             '38cff1ae26208862112021f063b361a4' => ['2.7.0', null],
         ],
+        'static/css/iframe_editor.css' => [
+            '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],
+            'a24f0ca1e53c175e1bf091f74df37e2b' => ['2.2.2', '2.5.0'],
+            'eb6c3b471926190b8059f49202465b5c' => ['2.5.2', '2.6.1'],
+            '09d9db766fe56a55dcfe891a7cc5248a' => ['2.7.0', null],
+        ],
         'static/skins/colibris/index.js' => [
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
             '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
