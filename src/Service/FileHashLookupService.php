@@ -79,7 +79,8 @@ class FileHashLookupService
             '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
             '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
             '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', '2.5.1'],
-            '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', null],
+            '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', '2.6.1'],
+            '38cff1ae26208862112021f063b361a4' => ['2.7.0', null],
         ],
         'static/skins/colibris/index.js' => [
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],

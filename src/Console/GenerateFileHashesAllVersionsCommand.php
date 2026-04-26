@@ -22,14 +22,14 @@ class GenerateFileHashesAllVersionsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('matches-count', null, InputArgument::OPTIONAL, 'Minimum count of matches for version to be considered valid', 3)
+            ->addOption('matches-count', 'm', InputArgument::OPTIONAL, 'Minimum count of matches for version to be considered valid', 4)
             ->addArgument('file', InputArgument::REQUIRED, 'File path to check');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $filePath = $input->getArgument('file');
-        $countVersionsMatch = $input->getOption('matches-count');
+        $countVersionsMatch = (int) $input->getOption('matches-count');
 
         $allInstances = $this->getInstances();
         $instanceResults = new InstanceResults();
