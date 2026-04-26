@@ -114,7 +114,6 @@ class GenerateFileHashesAllVersionsCommand extends Command
             $scannedInstances++;
 
             $instanceResult = new InstanceResult($instance['name'], $version, $fileHash, $fileContent);
-            $instanceResults->add($instanceResult);
 
             if ($instanceResult->fileHash === null) {
                 $output->writeln('<error>Could not get hash for instance ' . $instance['name'] . '</error>', OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -137,11 +136,8 @@ class GenerateFileHashesAllVersionsCommand extends Command
                 if ($foundMatchesForHash[$instanceResult->fileHash] === $countVersionsMatchNeeded) {
                     break;
                 }
-            } else {
-//                $output->writeln('<error>Mismatch found for version ' . $version . ' and hashes ' . $fileHash . ' != ' . $lastInstanceResult->fileHash . ' for servers: ' . $instanceResult->name . ', ' . $lastInstanceResult->name . '</error>');
-//                $output->writeln($lastInstanceResult->name . ': (' . mb_strlen($lastInstanceResult->fileContent) . ') ' . mb_substr($lastInstanceResult->fileContent, 0, 500), OutputInterface::VERBOSITY_DEBUG);
-//                $output->writeln($instanceResult->name . ': (' . mb_strlen($instanceResult->fileContent) . ') ' . mb_substr($instanceResult->fileContent, 0, 500), OutputInterface::VERBOSITY_DEBUG);
             }
+            $instanceResults->add($instanceResult);
         }
     }
 
