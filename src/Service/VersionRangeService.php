@@ -36,6 +36,10 @@ class VersionRangeService
         $maxVersion = null;
         $minVersion = null;
         foreach ($this->versionRanges as $version) {
+            if ($minVersion !== null && $version->getMaxVersion() !== null && version_compare($version->getMaxVersion(), $minVersion, '<')) {
+                continue;
+            }
+
             if ($maxVersion === null || version_compare($version->getMaxVersion() ?? '', $maxVersion, '<')) {
                 $maxVersion = $version->getMaxVersion();
             }
