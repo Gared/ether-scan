@@ -21,11 +21,6 @@ class GenerateRevisionLookupCommand extends Command
         $github = new GithubApi();
         $tagData = $github->getTags();
 
-        if ($tagData === null) {
-            $output->writeln('Failed to fetch tags');
-            return self::FAILURE;
-        }
-
         $saveData = [];
 
         foreach ($tagData as $tag) {

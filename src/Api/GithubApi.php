@@ -5,6 +5,7 @@ namespace Gared\EtherScan\Api;
 
 use Exception;
 use GuzzleHttp\Client;
+use RuntimeException;
 
 class GithubApi
 {
@@ -27,23 +28,32 @@ class GithubApi
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 
         if (is_array($data) === false || array_key_exists('sha', $data) === false) {
-            throw new \RuntimeException('Unexpected response from GitHub API: ' . $body);
+            throw new RuntimeException('Unexpected response from GitHub API: ' . $body);
         }
 
         return $data;
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return list<array{commit: array{sha: string}, name: string}>
      */
-    public function getTags(): ?array
+    public function getTags(): array
     {
-        try {
-            $response = $this->client->get('/repos/ether/etherpad/tags?per_page=100');
-            $body = (string)$response->getBody();
-            return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception) {
-            return null;
+        $response = $this->client->get('/repos/ether/etherpad/tags?per_page=100');
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+
+        if (is_array($data) === false) {
+            throw new RuntimeException('Unexpected response from GitHub API: ' . $body);
         }
+
+        foreach ($data as $tag) {
+            if (is_array($tag) === false || array_key_exists('commit', $tag) === false || array_key_exists('sha', $tag['commit']) === false || array_key_exists('name', $tag) === false) {
+                throw new RuntimeException('Unexpected response from GitHub API: ' . $body);
+            }
+        }
+
+        /** @phpstan-ignore return.type */
+        return $data;
     }
 }

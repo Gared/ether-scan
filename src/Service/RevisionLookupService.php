@@ -7,7 +7,7 @@ use RuntimeException;
 
 class RevisionLookupService
 {
-    private const REVISION_LOOKUP_FILE = __DIR__ . '/../../data/revision_lookup.json';
+    private const string REVISION_LOOKUP_FILE = __DIR__ . '/../../data/revision_lookup.json';
 
     public function getVersion(string $commitHash): ?string
     {
@@ -18,17 +18,14 @@ class RevisionLookupService
             throw new RuntimeException('Could not read revision lookup file');
         }
 
+        /** @var array<string, string> $data */
         $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-
-        if (is_array($data) === false) {
-            throw new RuntimeException('Could not decode revision lookup file');
-        }
 
         return $data[$shortHash] ?? null;
     }
 
     /**
-     * @param array<mixed, mixed> $data
+     * @param array<string, string> $data
      */
     public function save(array $data): void
     {

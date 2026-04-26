@@ -261,8 +261,6 @@ class ScannerService
         }
     }
 
-
-
     private function doSocketWebsocket(
         int $socketIoVersion,
         string $cookieString,
