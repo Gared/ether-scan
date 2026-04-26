@@ -18,17 +18,19 @@ class GithubApi
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array{sha: string}
      */
-    public function getCommit(string $commitHash): ?array
+    public function getCommit(string $commitHash): array
     {
-        try {
-            $response = $this->client->get('/repos/ether/etherpad/commits/' . $commitHash);
-            $body = (string)$response->getBody();
-            return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception) {
-            return null;
+        $response = $this->client->get('/repos/ether/etherpad/commits/' . $commitHash);
+        $body = (string)$response->getBody();
+        $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+
+        if (is_array($data) === false || array_key_exists('sha', $data) === false) {
+            throw new \RuntimeException('Unexpected response from GitHub API: ' . $body);
         }
+
+        return $data;
     }
 
     /**
