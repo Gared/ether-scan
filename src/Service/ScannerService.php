@@ -9,6 +9,7 @@ use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
+use Gared\EtherScan\Service\Scanner\ApiEndpointScanner;
 use Gared\EtherScan\Service\Scanner\Health\HealthScanner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -24,16 +25,13 @@ use Psr\Http\Message\UriInterface;
 
 class ScannerService
 {
-    private readonly ApiVersionLookupService $versionLookup;
-    private readonly GithubApi $githubApi;
     private readonly Client $client;
     private readonly FileHashLookupService $fileHashLookup;
-    private readonly RevisionLookupService $revisionLookup;
     private readonly VersionRangeService $versionRangeService;
     private string $baseUrl;
     private ?string $pathPrefix = null;
-    private ?string $apiVersion = null;
     private string $padId;
+    private readonly ApiEndpointScanner $apiEndpointScanner;
     private HealthScanner $healthScanner;
 
     public function __construct(
@@ -56,11 +54,17 @@ class ScannerService
             'verify' => false,
         ]);
 
-        $this->versionLookup = new ApiVersionLookupService();
+        $versionLookup = new ApiVersionLookupService();
         $this->fileHashLookup = new FileHashLookupService();
-        $this->revisionLookup = new RevisionLookupService();
+        $revisionLookup = new RevisionLookupService();
         $this->versionRangeService = new VersionRangeService();
-        $this->githubApi = new GithubApi();
+        $githubApi = new GithubApi();
+        $this->apiEndpointScanner = new ApiEndpointScanner(
+            $this->versionRangeService,
+            $revisionLookup,
+            $versionLookup,
+            $githubApi,
+        );
         $this->healthScanner = new HealthScanner($this->versionRangeService);
     }
 
@@ -72,7 +76,7 @@ class ScannerService
         $this->padId = 'test' . rand(1, 99999);
 
         $this->scanBaseUrl($callback);
-        $this->scanApi($callback);
+        $this->apiEndpointScanner->scan($this->client, $this->baseUrl, $callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
         $this->healthScanner->scan($this->client, $this->baseUrl, $callback);
@@ -114,7 +118,7 @@ class ScannerService
                     $response = $this->client->get($uriApi->__toString());
                     $body = (string)$response->getBody();
                     $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-                    if (array_key_exists('currentVersion', $data) === false) {
+                    if (is_array($data) && array_key_exists('currentVersion', $data) === false) {
                         throw new EtherpadServiceNotFoundException('No Etherpad service found');
                     }
                     $this->baseUrl = $uri->__toString() . '/';
@@ -143,46 +147,6 @@ class ScannerService
         return false;
     }
 
-    private function scanApi(ScannerServiceCallbackInterface $callback): void
-    {
-        $callback->onScanApiStart($this->baseUrl);
-        try {
-            $response = $this->client->get($this->baseUrl . 'api');
-            $callback->onScanApiResponse($response);
-
-            $revision = $this->getRevisionFromHeaders($response);
-
-            $callback->onScanApiRevision($revision);
-            if ($revision !== null) {
-
-                $commit = $this->githubApi->getCommit($revision);
-                if ($commit !== null) {
-                    $this->versionRangeService->setRevisionVersion($this->revisionLookup->getVersion($commit['sha']));
-                    $callback->onScanApiRevisionCommit($commit);
-                }
-            }
-
-            try {
-                $body = (string)$response->getBody();
-                $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-
-                if (isset($data['currentVersion']) === false) {
-                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
-                }
-
-                $apiVersion = $data['currentVersion'];
-                $versionRange = $this->versionLookup->getEtherpadVersionRange($apiVersion);
-                $this->apiVersion = $apiVersion;
-                $callback->onScanApiVersion($apiVersion);
-                $this->versionRangeService->addVersionRange($versionRange);
-            } catch (JsonException $e) {
-                $callback->onScanApiException($e);
-            }
-        } catch (GuzzleException $e) {
-            $callback->onScanApiException($e);
-        }
-    }
-
     private function scanAdmin(ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanAdminStart();
@@ -206,7 +170,7 @@ class ScannerService
         $versionRange = $this->versionRangeService->calculateVersion();
 
         $socketIoVersion = ElephantClient::CLIENT_2X;
-        if (version_compare($this->apiVersion ?? '999', '1.2.13', '<=')) {
+        if (version_compare($versionRange?->getMaxVersion() ?? '999', '1.8.0', '<=')) {
             $socketIoVersion = ElephantClient::CLIENT_1X;
         } else if (version_compare($versionRange?->getMinVersion() ?? '0.1', '2.0.0', '>=')) {
             $socketIoVersion = ElephantClient::CLIENT_4X;
@@ -253,18 +217,6 @@ class ScannerService
         }
     }
 
-    private function getRevisionFromHeaders(ResponseInterface $response): ?string
-    {
-        $serverHeaders = $response->getHeader('Server');
-        if (count($serverHeaders) === 0) {
-            return null;
-        }
-
-        $matches = null;
-        preg_match('/Etherpad(-Lite)?\s([0-9a-z]+)/', $serverHeaders[0], $matches);
-        return $matches[2] ?? null;
-    }
-
     private function scanStaticFiles(ScannerServiceCallbackInterface $callback): void
     {
         foreach (FileHashLookupService::getFileNames() as $file) {
@@ -308,8 +260,6 @@ class ScannerService
             $callback->onStatsException($e);
         }
     }
-
-
 
     private function doSocketWebsocket(
         int $socketIoVersion,
