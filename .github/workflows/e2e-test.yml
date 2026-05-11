@@ -355,11 +355,14 @@ jobs:
   EtherpadDockerWithPlugins:
     name: Docker [${{ matrix.versions.tag }}] with plugins
     runs-on: ubuntu-latest
-    needs: DynamicVersionMatrix
 
     strategy:
       matrix:
-        versions: ${{ fromJSON(needs.DynamicVersionMatrix.outputs.matrix) }}
+        versions: [
+          { tag: "2.7.2" },
+          { tag: "2.6.1" },
+          { tag: "2.5.0" },
+        ]
       fail-fast: false
     steps:
       - name: Checkout repository
@@ -387,7 +390,7 @@ jobs:
           output="$(bin/console.php ether:scan http://localhost:9001)"
           echo "$output"
 
-          expected="Package version: ${{ matrix.versions.expected }}"
+          expected="Package version: ${{ matrix.versions.tag }}"
           if ! grep -Fq "$expected" <<< "$output"; then
             echo "Assertion failed: expected output to contain: $expected"
             exit 1
