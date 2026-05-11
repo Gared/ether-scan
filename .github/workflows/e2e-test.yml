@@ -372,6 +372,11 @@ jobs:
         run: |
           EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.plugins.yml up -d --wait
 
+      - name: Dump docker compose logs on failure
+        if: failure()
+        run: |
+          docker compose -f ./tests/e2e/docker/docker-compose.plugins.yml logs --no-color --timestamps
+
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@v5
