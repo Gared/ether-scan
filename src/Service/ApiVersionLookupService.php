@@ -21,7 +21,8 @@ class ApiVersionLookupService
         '1.2.13' => ['1.6.0', '1.8.0'],
         '1.2.14' => ['1.8.1', '1.8.5'],
         '1.2.15' =>['1.8.6', '1.8.18'],
-        '1.3.0' => ['1.9.0', null],
+        '1.3.0' => ['1.9.0', '2.7.2'],
+        '1.3.1' => ['2.7.3', null],
     ];
 
     public function getEtherpadVersionRange(string $apiVersion): ?VersionRange
