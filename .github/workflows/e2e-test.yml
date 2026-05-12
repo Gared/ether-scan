@@ -371,6 +371,7 @@ jobs:
       - name: Start docker containers
         run: |
           export ORIGINAL_CMD=$(docker inspect --format='{{join .Config.Cmd " "}}' etherpad/etherpad:${{ matrix.versions.tag }})
+          echo "Original CMD: $ORIGINAL_CMD"
           EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.plugins.yml up -d --wait
 
       - name: Dump docker compose logs on failure
