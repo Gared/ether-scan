@@ -1,6 +1,14 @@
 services:
     etherpad:
         image: etherpad/etherpad:$EP_VERSION
-        command: ["sh", "-c", "pnpm run plugins i ep_align ep_headings2 ep_font_color ep_adminpads2 ep_comments_page ep_font_size ep_markdown && pnpm run prod"]
+        entrypoint:
+          - /bin/sh
+          - -c
+          - |
+            echo "Running pre-start command to install plugins"
+            pnpm run plugins i ep_align ep_headings2 ep_font_color ep_adminpads2 ep_comments_page ep_font_size ep_markdown
+
+            exec "$@"
+          - --
         ports:
           - 9001:9001
