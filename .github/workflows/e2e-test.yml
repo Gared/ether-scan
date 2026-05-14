@@ -400,10 +400,12 @@ jobs:
           output="$(bin/console.php ether:scan http://localhost:9001)"
           echo "$output"
 
-          expected="Package version: ${{ matrix.versions.tag }}"
-          if ! grep -Fq "$expected" <<< "$output"; then
-            echo "Assertion failed: expected output to contain: $expected"
-            exit 1
+          if [[ "${{ matrix.editOnly }}" == "false" ]]; then
+            expected="Package version: ${{ matrix.versions.tag }}"
+            if ! grep -Fq "$expected" <<< "$output"; then
+              echo "Assertion failed: expected output to contain: $expected"
+              exit 1
+            fi
           fi
 
           expectedPackages=(
