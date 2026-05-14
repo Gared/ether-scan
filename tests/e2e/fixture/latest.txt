@@ -9,13 +9,13 @@ Starting scan of api: http://localhost:9001/
 Starting scan of a pad...
 =========================
 
+ [OK] Websocket is supported
+
  [INFO] Package version: $EP_VERSION
 
  [INFO] No plugins found
 
  [OK] Pads are publicly accessible
-
- [OK] Websocket is supported
 
  [OK] Server is healthy
 

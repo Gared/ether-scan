@@ -305,6 +305,7 @@ class ScannerService
         while ($result = $socketIoClient->wait('message', 2)) {
             if (is_array($result->data)) {
                 $accessStatus = $result->data['accessStatus'] ?? null;
+                $callback->onConnectedTransport($engine->getTransport() === SocketIO::TRANSPORT_WEBSOCKET);
                 if ($accessStatus === 'deny') {
                     $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
                     return;
@@ -321,7 +322,7 @@ class ScannerService
                 $this->versionRangeService->setPackageVersion($version);
                 $callback->onClientVars($version, $result->data);
                 $callback->onScanPluginsList($onlyPlugins);
-                $callback->onScanPadSuccess($engine->getTransport() === SocketIO::TRANSPORT_WEBSOCKET);
+                $callback->onScanPadSuccess();
                 break;
             }
         }
