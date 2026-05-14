@@ -57,6 +57,11 @@ class VersionRangeService
         $this->packageVersion = $packageVersion;
     }
 
+    public function getPackageVersion(): ?string
+    {
+        return $this->packageVersion;
+    }
+
     public function setRevisionVersion(?string $revisionVersion): void
     {
         $this->revisionVersion = $revisionVersion;

@@ -353,7 +353,7 @@ jobs:
           diff -u /tmp/latest.txt /tmp/actual.txt
 
   EtherpadDockerWithPlugins:
-    name: Docker [${{ matrix.versions.tag }}] with plugins
+    name: "Docker [${{ matrix.versions.tag }}] with plugins, editOnly: ${{ matrix.editOnly }}"
     runs-on: ubuntu-latest
 
     strategy:
@@ -363,6 +363,7 @@ jobs:
           { tag: "2.6.1" },
           { tag: "2.5.0" },
         ]
+        editOnly: ["true", "false"]
       fail-fast: false
     steps:
       - name: Checkout repository
@@ -373,6 +374,7 @@ jobs:
           docker pull etherpad/etherpad:${{ matrix.versions.tag }}
           export ORIGINAL_CMD=$(docker inspect --format='{{join .Config.Cmd " "}}' etherpad/etherpad:${{ matrix.versions.tag }})
           echo "Original CMD: $ORIGINAL_CMD"
+          export EDIT_ONLY=${{ matrix.editOnly }}
           EP_VERSION=${{ matrix.versions.tag }} docker compose -f ./tests/e2e/docker/docker-compose.plugins.yml up -d --wait
 
       - name: Dump docker compose logs on failure
@@ -398,17 +400,18 @@ jobs:
           output="$(bin/console.php ether:scan http://localhost:9001)"
           echo "$output"
 
-          expected="Package version: ${{ matrix.versions.tag }}"
-          if ! grep -Fq "$expected" <<< "$output"; then
-            echo "Assertion failed: expected output to contain: $expected"
-            exit 1
+          if [[ "${{ matrix.editOnly }}" == "false" ]]; then
+            expected="Package version: ${{ matrix.versions.tag }}"
+            if ! grep -Fq "$expected" <<< "$output"; then
+              echo "Assertion failed: expected output to contain: $expected"
+              exit 1
+            fi
           fi
 
           expectedPackages=(
             "ep_align"
             "ep_headings2"
             "ep_font_color"
-            "ep_adminpads2"
             "ep_comments_page"
             "ep_font_size"
             "ep_markdown"

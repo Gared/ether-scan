@@ -2,5 +2,7 @@ services:
     etherpad:
         image: etherpad/etherpad:$EP_VERSION
         entrypoint: /bin/sh -c "pnpm run plugins i ep_align ep_headings2 ep_font_color ep_adminpads2 ep_comments_page ep_font_size ep_markdown && ${ORIGINAL_CMD}"
+        environment:
+          - EDIT_ONLY=${EDIT_ONLY}
         ports:
           - 9001:9001
