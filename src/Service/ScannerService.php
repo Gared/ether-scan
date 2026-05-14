@@ -11,6 +11,7 @@ use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
 use Gared\EtherScan\Service\Scanner\ApiEndpointScanner;
 use Gared\EtherScan\Service\Scanner\Health\HealthScanner;
+use Gared\EtherScan\Service\Scanner\PluginDefinitionScanner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
@@ -33,6 +34,7 @@ class ScannerService
     private string $padId;
     private readonly ApiEndpointScanner $apiEndpointScanner;
     private HealthScanner $healthScanner;
+    private PluginDefinitionScanner $pluginDefinitionScanner;
 
     public function __construct(
         string $url,
@@ -66,6 +68,7 @@ class ScannerService
             $githubApi,
         );
         $this->healthScanner = new HealthScanner($this->versionRangeService);
+        $this->pluginDefinitionScanner = new PluginDefinitionScanner();
     }
 
     /**
@@ -79,6 +82,9 @@ class ScannerService
         $this->apiEndpointScanner->scan($this->client, $this->baseUrl, $callback);
         $this->scanStaticFiles($callback);
         $this->scanPad($callback);
+        if ($this->versionRangeService->getPackageVersion() === null) {
+            $this->pluginDefinitionScanner->scan($this->client, $this->baseUrl, $callback);
+        }
         $this->healthScanner->scan($this->client, $this->baseUrl, $callback);
         $this->progressVersionRanges($callback);
         $this->scanStats($callback);

@@ -72,7 +72,8 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
         $pluginData = [];
         foreach ($plugins as $pluginName => $plugin) {
-            $pluginData[] = $pluginName . '@' . $plugin['package']['version'];
+            $version = $plugin['package']['version'] ?? null;
+            $pluginData[] = $pluginName . ($version === null ? '' : '@' . $version);
         }
         sort($pluginData);
 
