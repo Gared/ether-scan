@@ -139,9 +139,13 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->error($e->getMessage());
     }
 
-    public function onScanPadSuccess(bool $usedWebsocket): void
+    public function onScanPadSuccess(): void
     {
         $this->symfonyStyle->success('Pads are publicly accessible');
+    }
+
+    public function onConnectedTransport(bool $usedWebsocket): void
+    {
         if ($usedWebsocket) {
             $this->symfonyStyle->success('Websocket is supported');
         } else {
