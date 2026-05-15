@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CheckFileHashesCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('url', InputArgument::REQUIRED, 'Url to etherpad instance')
