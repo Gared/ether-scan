@@ -9,7 +9,7 @@ class Config
 
     public function __construct(
         public string $baseUrl,
-        public readonly float $timeout,
+        public readonly float $timeout = 5.0,
     ) {
         $domain = parse_url($this->baseUrl, PHP_URL_HOST);
         if (is_string($domain) === false) {
