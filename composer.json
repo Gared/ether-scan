@@ -16,7 +16,7 @@
     "php": ">=8.3",
     "ext-json": "*",
     "guzzlehttp/guzzle": "^7.8",
-    "symfony/console": "^6.4|^7.0",
+    "symfony/console": "^6.4|^7.0|^8.0",
     "elephantio/elephant.io": "5.1.*"
   },
   "require-dev": {

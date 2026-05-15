@@ -26,8 +26,11 @@ class ScanCommand extends Command
     {
         $outputHelper = new ScanCommandOutputHelper(new SymfonyStyle($input, $output), $output);
 
-        $scanner = new ScannerService($input->getArgument('url'));
-        $scanner->scan($outputHelper);
+        $scanner = new ScannerService();
+        $scanner->scan(
+            url: $input->getArgument('url'),
+            callback: $outputHelper,
+        );
 
         return self::SUCCESS;
     }
