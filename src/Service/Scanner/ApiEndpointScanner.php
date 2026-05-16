@@ -5,6 +5,7 @@ namespace Gared\EtherScan\Service\Scanner;
 
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
+use Gared\EtherScan\Model\Config;
 use Gared\EtherScan\Service\ApiVersionLookupService;
 use Gared\EtherScan\Service\RevisionLookupService;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
@@ -18,6 +19,7 @@ use RuntimeException;
 readonly class ApiEndpointScanner
 {
     public function __construct(
+        private Client $client,
         private VersionRangeService $versionRangeService,
         private RevisionLookupService $revisionLookupService,
         private ApiVersionLookupService $apiVersionLookupService,
@@ -25,11 +27,11 @@ readonly class ApiEndpointScanner
     ) {
     }
 
-    public function scan(Client $client, string $baseUrl, ScannerServiceCallbackInterface $callback): void
+    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
     {
-        $callback->onScanApiStart($baseUrl);
+        $callback->onScanApiStart($config->baseUrl);
         try {
-            $response = $client->get($baseUrl . 'api');
+            $response = $this->client->get($config->baseUrl . 'api', ['timeout' => $config->timeout]);
             $callback->onScanApiResponse($response);
 
             $revision = $this->getRevisionFromHeaders($response);

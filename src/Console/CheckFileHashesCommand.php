@@ -5,8 +5,8 @@ namespace Gared\EtherScan\Console;
 
 use Gared\EtherScan\Model\VersionRange;
 use Gared\EtherScan\Service\FileHashLookupService;
+use Gared\EtherScan\Service\StaticFileClient;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CheckFileHashesCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('url', InputArgument::REQUIRED, 'Url to etherpad instance')
@@ -32,12 +32,13 @@ class CheckFileHashesCommand extends Command
         $version = $input->getArgument('version');
 
         $fileHashLookup = new FileHashLookupService();
+        $staticFileClient = new StaticFileClient(new Client());
 
         $files = FileHashLookupService::getFileNames();
 
         $versionRanges = [];
         foreach  ($files as $file) {
-            $fileHash = $this->getFileHash($url, $file);
+            $fileHash = $staticFileClient->getFileHash($url, $file);
             $versionRange = $fileHashLookup->getEtherpadVersionRange($file, $fileHash);
             if ($versionRange !== null) {
                 $versionRanges[] = $versionRange;
@@ -83,25 +84,5 @@ class CheckFileHashesCommand extends Command
         }
 
         return new VersionRange($minVersion, $maxVersion);
-    }
-
-    private function getFileHash(string $url, string $path): ?string
-    {
-        try {
-            $client = new Client([
-                'base_uri' => $url,
-                'timeout' => 5.0,
-                'verify' => false,
-            ]);
-            $response = $client->get($path, [
-                'headers' => ['Accept-Encoding' => 'gzip'],
-            ]);
-
-            $body = (string)$response->getBody();
-            return hash('md5', $body);
-        } catch (GuzzleException) {
-        }
-
-        return null;
     }
 }

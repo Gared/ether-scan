@@ -3,54 +3,48 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Service;
 
-use ElephantIO\Client as ElephantClient;
-use ElephantIO\Engine\SocketIO;
-use Exception;
 use Gared\EtherScan\Api\GithubApi;
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
-use Gared\EtherScan\Exception\EtherpadServiceNotPublicException;
+use Gared\EtherScan\Model\Config;
+use Gared\EtherScan\Service\Scanner\AdminScanner;
 use Gared\EtherScan\Service\Scanner\ApiEndpointScanner;
+use Gared\EtherScan\Service\Scanner\BaseUrlScanner;
 use Gared\EtherScan\Service\Scanner\Health\HealthScanner;
 use Gared\EtherScan\Service\Scanner\PluginDefinitionScanner;
+use Gared\EtherScan\Service\Scanner\StaticFilesScanner;
+use Gared\EtherScan\Service\Scanner\StatsScanner;
+use Gared\EtherScan\Service\Scanner\PadSocketIoScanner;
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
-use JsonException;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
 
 class ScannerService
 {
     private readonly Client $client;
     private readonly FileHashLookupService $fileHashLookup;
     private readonly VersionRangeService $versionRangeService;
-    private string $baseUrl;
-    private ?string $pathPrefix = null;
-    private string $padId;
     private readonly ApiEndpointScanner $apiEndpointScanner;
     private HealthScanner $healthScanner;
     private PluginDefinitionScanner $pluginDefinitionScanner;
+    private BaseUrlScanner $baseUrlScanner;
+    private StaticFilesScanner $staticFilesScanner;
+    private AdminScanner $adminScanner;
+    private PadSocketIoScanner $padSocketIoScanner;
+    private StatsScanner $statsScanner;
 
-    public function __construct(
-        string $url,
-        float $timeout = 2.0,
-    ) {
+    public function __construct()
+    {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
         $stack->push(Middleware::cookies(), 'cookies');
 
-        $this->baseUrl = $url;
-
         $this->client = new Client([
-            'timeout' => $timeout,
+            'timeout' => 10.0,
             'connect_timeout' => 2.0,
             RequestOptions::HEADERS => [
-                'User-Agent' => 'EtherpadScanner/3.4.0',
+                'User-Agent' => 'EtherpadScanner/4.0.0',
             ],
             'handler' => $stack,
             'verify' => false,
@@ -62,174 +56,51 @@ class ScannerService
         $this->versionRangeService = new VersionRangeService();
         $githubApi = new GithubApi();
         $this->apiEndpointScanner = new ApiEndpointScanner(
+            $this->client,
             $this->versionRangeService,
             $revisionLookup,
             $versionLookup,
             $githubApi,
         );
-        $this->healthScanner = new HealthScanner($this->versionRangeService);
-        $this->pluginDefinitionScanner = new PluginDefinitionScanner();
+        $this->healthScanner = new HealthScanner($this->client, $this->versionRangeService);
+        $this->pluginDefinitionScanner = new PluginDefinitionScanner($this->client);
+        $this->baseUrlScanner = new BaseUrlScanner($this->client);
+        $this->staticFilesScanner = new StaticFilesScanner(
+            new StaticFileClient($this->client),
+            $this->fileHashLookup,
+            $this->versionRangeService
+        );
+        $this->adminScanner = new AdminScanner($this->client);
+        $this->padSocketIoScanner = new PadSocketIoScanner(
+            $this->client,
+            $this->versionRangeService,
+        );
+        $this->statsScanner = new StatsScanner($this->client);
     }
 
     /**
      * @throws EtherpadServiceNotFoundException
      */
-    public function scan(ScannerServiceCallbackInterface $callback): void
-    {
-        $this->padId = 'test' . rand(1, 99999);
+    public function scan(
+        string $url,
+        ScannerServiceCallbackInterface $callback,
+        float $timeout = 2.0,
+    ): Config {
+        $config = new Config($url, $timeout);
 
-        $this->scanBaseUrl($callback);
-        $this->apiEndpointScanner->scan($this->client, $this->baseUrl, $callback);
-        $this->scanStaticFiles($callback);
-        $this->scanPad($callback);
+        $this->baseUrlScanner->scan($config);
+        $this->apiEndpointScanner->scan($config, $callback);
+        $this->staticFilesScanner->scan($config);
+        $this->padSocketIoScanner->scan($config, $callback);
         if ($this->versionRangeService->getPackageVersion() === null) {
-            $this->pluginDefinitionScanner->scan($this->client, $this->baseUrl, $callback);
+            $this->pluginDefinitionScanner->scan($config, $callback);
         }
-        $this->healthScanner->scan($this->client, $this->baseUrl, $callback);
+        $this->healthScanner->scan($config, $callback);
         $this->progressVersionRanges($callback);
-        $this->scanStats($callback);
-        $this->scanAdmin($callback);
-    }
+        $this->statsScanner->scan($config, $callback);
+        $this->adminScanner->scan($config, $callback);
 
-    private function scanBaseUrl(ScannerServiceCallbackInterface $callback): void
-    {
-        $uri = (new Uri($this->baseUrl))
-            ->withFragment('')
-            ->withQuery('');
-
-        if ($uri->getScheme() === '') {
-            $uri = $uri->withScheme('http');
-        }
-
-        while (true) {
-            $uriWithPad = $uri->withPath($uri->getPath() . '/p/' . $this->padId);
-            $result = $this->scanForPath($uriWithPad);
-            if ($result) {
-                $this->baseUrl = $uri->__toString() . '/';
-                $this->pathPrefix = 'p/';
-                return;
-            }
-
-            $uriWithPad = $uri->withPath($uri->getPath() . '/' . $this->padId);
-            $result = $this->scanForPath($uriWithPad);
-            if ($result) {
-                $this->baseUrl = $uri->__toString() . '/';
-                return;
-            }
-
-            $pathParts = explode('/', $uri->getPath());
-            if (count($pathParts) === 1) {
-                try {
-                    $uriApi = $uri->withPath($uri->getPath() . '/api');
-                    $response = $this->client->get($uriApi->__toString());
-                    $body = (string)$response->getBody();
-                    $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-                    if (is_array($data) && array_key_exists('currentVersion', $data) === false) {
-                        throw new EtherpadServiceNotFoundException('No Etherpad service found');
-                    }
-                    $this->baseUrl = $uri->__toString() . '/';
-                    return;
-                } catch (Exception) {
-                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
-                }
-            }
-            unset($pathParts[count($pathParts) - 1]);
-            $uri = $uri->withPath(implode('/', $pathParts));
-        }
-    }
-
-    private function scanForPath(UriInterface $uri): bool
-    {
-        try {
-            $response = $this->client->get($uri->__toString());
-            $body = (string) $response->getBody();
-            $isEtherpad = $response->getStatusCode() === 200 && str_contains($body, '"editorcontainer"');
-            if ($isEtherpad) {
-                return true;
-            }
-        } catch (GuzzleException) {
-        }
-
-        return false;
-    }
-
-    private function scanAdmin(ScannerServiceCallbackInterface $callback): void
-    {
-        $callback->onScanAdminStart();
-        $this->getAdmin('admin', 'admin', $callback);
-        $this->getAdmin('admin', 'changeme1', $callback);
-        $this->getAdmin('user', 'changeme1', $callback);
-    }
-
-    private function scanPad(ScannerServiceCallbackInterface $callback): void
-    {
-        $callback->onScanPadStart();
-        $cookies = new CookieJar();
-        try {
-            $this->client->get($this->baseUrl . $this->pathPrefix . $this->padId, [
-                'cookies' => $cookies,
-            ]);
-        } catch (GuzzleException $e) {
-            $callback->onScanPadException($e);
-        }
-
-        $versionRange = $this->versionRangeService->calculateVersion();
-
-        $socketIoVersion = ElephantClient::CLIENT_2X;
-        if (version_compare($versionRange?->getMaxVersion() ?? '999', '1.8.0', '<=')) {
-            $socketIoVersion = ElephantClient::CLIENT_1X;
-        } else if (version_compare($versionRange?->getMinVersion() ?? '0.1', '2.0.0', '>=')) {
-            $socketIoVersion = ElephantClient::CLIENT_4X;
-        }
-
-        $cookieString = '';
-        foreach ($cookies as $cookie) {
-            $cookieString .= $cookie->getName() . '=' . $cookie->getValue() . ';';
-        }
-        $token = 't.vbWE289T3YggPgRVvvuP';
-
-        try {
-            $this->doSocketWebsocket($socketIoVersion, $cookieString, $callback, $token);
-        } catch (Exception $e) {
-            $callback->onScanPadException($e);
-        }
-    }
-
-    private function getAdmin(string $user, string $password, ScannerServiceCallbackInterface $callback): void
-    {
-        try {
-            $response = $this->client->post($this->baseUrl . 'admin-auth/', [
-                'auth' => [$user, $password],
-            ]);
-            $body = (string) $response->getBody();
-            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200 && $body === 'Authorized');
-            return;
-        } catch (GuzzleException $e) {
-            if ($e->getCode() === 401 || $e->getCode() === 403) {
-                $callback->onScanAdminResult($user, $password, false);
-                return;
-            }
-        }
-
-        try {
-            $response = $this->client->get($this->baseUrl . 'admin/', [
-                'auth' => [$user, $password],
-            ]);
-            $body = (string) $response->getBody();
-            $callback->onScanAdminResult($user, $password, $response->getStatusCode() === 200 && str_contains($body, 'Plugin manager'));
-            return;
-        } catch (GuzzleException) {
-            $callback->onScanAdminResult($user, $password, false);
-        }
-    }
-
-    private function scanStaticFiles(ScannerServiceCallbackInterface $callback): void
-    {
-        foreach (FileHashLookupService::getFileNames() as $file) {
-            $hash = $this->getFileHash($file);
-            $versionRange = $this->fileHashLookup->getEtherpadVersionRange($file, $hash);
-            $this->versionRangeService->addVersionRange($versionRange);
-        }
+        return $config;
     }
 
     private function progressVersionRanges(ScannerServiceCallbackInterface $callback): void
@@ -241,97 +112,5 @@ class ScannerService
         }
 
         $callback->onVersionResult($versionRange->getMinVersion(), $versionRange->getMaxVersion());
-    }
-
-    private function getFileHash(string $path): ?string
-    {
-        try {
-            $response = $this->client->get($this->baseUrl . $path, [
-                'headers' => ['Accept-Encoding' => 'gzip']
-            ]);
-            $body = (string) $response->getBody();
-            return hash('md5', $body);
-        } catch (GuzzleException) {
-        }
-
-        return null;
-    }
-
-    private function scanStats(ScannerServiceCallbackInterface $callback): void
-    {
-        try {
-            $response = $this->client->get($this->baseUrl . 'stats');
-            $callback->onStatsResult(json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR));
-        } catch (GuzzleException|JsonException $e) {
-            $callback->onStatsException($e);
-        }
-    }
-
-    private function doSocketWebsocket(
-        int $socketIoVersion,
-        string $cookieString,
-        ScannerServiceCallbackInterface $callback,
-        string $token
-    ): void {
-        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $this->baseUrl . 'socket.io/', [
-            'persistent' => false,
-            'context' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                ],
-            ],
-            'headers' => [
-                'Cookie' => $cookieString,
-            ]
-        ]), $callback->getConsoleLogger());
-
-        $socketIoClient->connect();
-        $socketIoClient->of('/');
-        $socketIoClient->emit('message', [
-            'component' => 'pad',
-            'type' => 'CLIENT_READY',
-            'padId' => $this->padId,
-            'sessionID' => 'null',
-            'token' => $token,
-            'password' => null,
-            'protocolVersion' => 2,
-        ]);
-        $engine = $socketIoClient->getEngine();
-        if ($engine instanceof SocketIO === false) {
-            throw new Exception('Engine of unsupported class');
-        }
-
-        while ($result = $socketIoClient->wait('message', 2)) {
-            if (is_array($result->data)) {
-                $accessStatus = $result->data['accessStatus'] ?? null;
-                $callback->onConnectedTransport($engine->getTransport() === SocketIO::TRANSPORT_WEBSOCKET);
-                if ($accessStatus === 'deny') {
-                    $callback->onScanPadException(new EtherpadServiceNotPublicException('Pads are not publicly accessible'));
-                    return;
-                }
-                $data = $result->data;
-                if (isset($data['data']['type']) && $data['data']['type'] === 'CUSTOM') {
-                    continue;
-                }
-
-                $version = $data['data']['plugins']['plugins']['ep_etherpad-lite']['package']['version'];
-                $onlyPlugins = $data['data']['plugins']['plugins'];
-                unset($onlyPlugins['ep_etherpad-lite']);
-
-                $this->versionRangeService->setPackageVersion($version);
-                $callback->onClientVars($version, $result->data);
-                $callback->onScanPluginsList($onlyPlugins);
-                $callback->onScanPadSuccess();
-                break;
-            }
-        }
-
-        $socketIoClient->disconnect();
-    }
-
-    public function getBaseUrl(): string
-    {
-        return $this->baseUrl;
     }
 }

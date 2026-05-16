@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Service\Scanner\Health;
 
+use Gared\EtherScan\Model\Config;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use Gared\EtherScan\Service\VersionRangeService;
 use GuzzleHttp\Client;
@@ -12,14 +13,15 @@ use JsonException;
 readonly class HealthScanner
 {
     public function __construct(
+        private Client $client,
         private VersionRangeService $versionRangeService,
     ) {
     }
 
-    public function scan(Client $client, string $baseUrl, ScannerServiceCallbackInterface $callback): void
+    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $client->get($baseUrl . 'health');
+            $response = $this->client->get($config->baseUrl . 'health', ['timeout' => $config->timeout]);
         } catch (GuzzleException $e) {
             $callback->onHealthException(new HealthResponseException($e->getMessage()));
             return;

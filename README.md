@@ -7,6 +7,7 @@ What is this tool doing?
 * Check the API version (pad.example.com/api)
 * Check the etherpad version
 * Check if the pads are publicly accessible
+* Check if websocket is working
 * Check if the server is healthy (pad.example.com/health)
 * Check if the admin area is accessible with default credentials (pad.example.com/admin)
 * Check if any (frontend) plugins are installed
@@ -14,7 +15,7 @@ What is this tool doing?
 
 ## Try it out
 
-You can try this tool out on the https://scanner.etherpad.org which is using this library.
+You can try this tool out on https://scanner.etherpad.org/instances which is using this library.
 
 ## Requirements
 

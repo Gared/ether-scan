@@ -5,7 +5,6 @@ namespace Gared\EtherScan\Console;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Exception;
 use Gared\EtherScan\Service\Scanner\Health\HealthResponseException;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use GuzzleHttp\Exception\GuzzleException;

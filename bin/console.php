@@ -12,9 +12,11 @@ use Symfony\Component\Console\Application;
 require __DIR__ . '/../vendor/autoload.php';
 
 $application = new Application();
-$application->add(new ScanCommand());
-$application->add(new GenerateRevisionLookupCommand());
-$application->add(new GenerateFileHashesCommand());
-$application->add(new CheckFileHashesCommand());
-$application->add(new GenerateFileHashesAllVersionsCommand());
+$application->addCommands([
+    new ScanCommand(),
+    new GenerateRevisionLookupCommand(),
+    new GenerateFileHashesCommand(),
+    new CheckFileHashesCommand(),
+    new GenerateFileHashesAllVersionsCommand(),
+]);
 $application->run();

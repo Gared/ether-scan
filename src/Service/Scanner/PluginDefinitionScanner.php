@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service\Scanner;
 
 use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
+use Gared\EtherScan\Model\Config;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -11,10 +12,15 @@ use JsonException;
 
 readonly class PluginDefinitionScanner
 {
-    public function scan(Client $client, string $baseUrl, ScannerServiceCallbackInterface $callback): void
+    public function __construct(
+        private Client $client,
+    ) {
+    }
+
+    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
     {
         try {
-            $response = $client->get($baseUrl . 'pluginfw/plugin-definitions.json');
+            $response = $this->client->get($config->baseUrl . 'pluginfw/plugin-definitions.json', ['timeout' => $config->timeout]);
 
             try {
                 $body = (string)$response->getBody();
