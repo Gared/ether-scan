@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Gared\EtherScan\Tests\Unit\Service;
+namespace Gared\EtherScan\Tests\Unit\Service\Scanner;
 
 use Gared\EtherScan\Model\Config;
 use Gared\EtherScan\Service\Scanner\PluginDefinitionScanner;

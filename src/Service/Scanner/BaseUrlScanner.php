@@ -20,12 +20,28 @@ readonly class BaseUrlScanner
 
     public function scan(Config $config): void
     {
-        $uri = (new Uri($config->baseUrl))
+        $uri = (new Uri(rtrim($config->baseUrl, '/')))
             ->withFragment('')
             ->withQuery('');
 
         if ($uri->getScheme() === '') {
             $uri = $uri->withScheme('http');
+        }
+
+        if ($uri->getPath() !== '') {
+            $result = $this->scanForPath($uri, $config);
+            if ($result) {
+                $pathParts = explode('/', $uri->getPath());
+                unset($pathParts[count($pathParts) - 1]);
+                if ($pathParts[count($pathParts) - 1] === 'p') {
+                    unset($pathParts[count($pathParts) - 1]);
+                }
+                $uri = $uri->withPath(implode('/', $pathParts));
+
+                $config->baseUrl = $uri->__toString() . '/';
+                $config->pathPrefix = str_starts_with($uri->getPath(), 'p/') ? 'p/' : null;
+                return;
+            }
         }
 
         while (true) {
