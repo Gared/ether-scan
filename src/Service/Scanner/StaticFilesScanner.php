@@ -13,16 +13,15 @@ readonly class StaticFilesScanner
     public function __construct(
         private StaticFileClient $staticFileClient,
         private FileHashLookupService $fileHashLookupService,
-        private VersionRangeService $versionRangeService,
     ) {
     }
 
-    public function scan(Config $config): void
+    public function scan(Config $config, VersionRangeService $versionRangeService): void
     {
         foreach (FileHashLookupService::getFileNames() as $file) {
             $hash = $this->staticFileClient->getFileHash($config->baseUrl, $file, $config->timeout);
             $versionRange = $this->fileHashLookupService->getEtherpadVersionRange($file, $hash);
-            $this->versionRangeService->addVersionRange($versionRange);
+            $versionRangeService->addVersionRange($versionRange);
         }
     }
 }

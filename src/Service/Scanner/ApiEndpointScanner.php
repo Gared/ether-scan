@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service\Scanner;
 
 use Gared\EtherScan\Api\GithubApi;
-use Gared\EtherScan\Exception\EtherpadServiceNotFoundException;
 use Gared\EtherScan\Model\Config;
 use Gared\EtherScan\Service\ApiVersionLookupService;
 use Gared\EtherScan\Service\RevisionLookupService;
@@ -20,14 +19,13 @@ readonly class ApiEndpointScanner
 {
     public function __construct(
         private Client $client,
-        private VersionRangeService $versionRangeService,
         private RevisionLookupService $revisionLookupService,
         private ApiVersionLookupService $apiVersionLookupService,
         private GithubApi $githubApi,
     ) {
     }
 
-    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
+    public function scan(Config $config, VersionRangeService $versionRangeService, ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanApiStart($config->baseUrl);
         try {
@@ -49,7 +47,7 @@ readonly class ApiEndpointScanner
             } catch (RuntimeException) {
                 return;
             }
-            $this->versionRangeService->setRevisionVersion($this->revisionLookupService->getVersion($commit['sha']));
+            $versionRangeService->setRevisionVersion($this->revisionLookupService->getVersion($commit['sha']));
             $callback->onScanApiRevisionCommit($commit);
         }
 
@@ -70,7 +68,7 @@ readonly class ApiEndpointScanner
 
         $versionRange = $this->apiVersionLookupService->getEtherpadVersionRange($apiVersion);
         $callback->onScanApiVersion($apiVersion);
-        $this->versionRangeService->addVersionRange($versionRange);
+        $versionRangeService->addVersionRange($versionRange);
     }
 
     private function getRevisionFromHeaders(ResponseInterface $response): ?string
