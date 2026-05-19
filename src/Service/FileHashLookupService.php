@@ -79,7 +79,8 @@ class FileHashLookupService
             '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
             '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', '2.5.1'],
             '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', '2.6.1'],
-            '38cff1ae26208862112021f063b361a4' => ['2.7.0', null],
+            '38cff1ae26208862112021f063b361a4' => ['2.7.0', '2.7.3'],
+            'c844c72dc38ff4fc8da493d2dabb50aa' => ['3.0.0', null],
         ],
         'static/css/iframe_editor.css' => [
             '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],

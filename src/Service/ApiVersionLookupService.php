@@ -7,7 +7,7 @@ use Gared\EtherScan\Model\VersionRange;
 
 class ApiVersionLookupService
 {
-    private const API_VERSIONS = [
+    private const array API_VERSIONS = [
         '1' => ['1', '1.1.1'],
         '1.1' => ['1.2', '1.2.1'],
         '1.2' => ['1.2.2', '1.2.4'],

@@ -164,8 +164,8 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
             return;
         }
 
-        if (version_compare($maxVersion, '2.0.0', '<')) {
-            $this->symfonyStyle->error('You have an old version of etherpad! Please update to 2.0.0 or newer!');
+        if (version_compare($maxVersion, '2.7.0', '<')) {
+            $this->symfonyStyle->error('You have an old version of etherpad! Please update to 2.7.0 or newer!');
         }
 
         if ($minVersion === null) {
