@@ -32,41 +32,45 @@ readonly class ApiEndpointScanner
         $callback->onScanApiStart($config->baseUrl);
         try {
             $response = $this->client->get($config->baseUrl . 'api', ['timeout' => $config->timeout]);
-            $callback->onScanApiResponse($response);
-
-            $revision = $this->getRevisionFromHeaders($response);
-
-            $callback->onScanApiRevision($revision);
-            if ($revision !== null) {
-
-                try {
-                    $commit = $this->githubApi->getCommit($revision);
-                } catch (RuntimeException) {
-                    return;
-                }
-                $this->versionRangeService->setRevisionVersion($this->revisionLookupService->getVersion($commit['sha']));
-                $callback->onScanApiRevisionCommit($commit);
-            }
-
-            try {
-                $body = (string)$response->getBody();
-                $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-
-                if (is_array($data) === false || array_key_exists('currentVersion', $data) === false) {
-                    throw new EtherpadServiceNotFoundException('No Etherpad service found');
-                }
-
-                $apiVersion = $data['currentVersion'];
-
-                $versionRange = $this->apiVersionLookupService->getEtherpadVersionRange($apiVersion);
-                $callback->onScanApiVersion($apiVersion);
-                $this->versionRangeService->addVersionRange($versionRange);
-            } catch (JsonException $e) {
-                $callback->onScanApiException($e);
-            }
         } catch (GuzzleException $e) {
             $callback->onScanApiException($e);
+            return;
         }
+
+        $callback->onScanApiResponse($response);
+
+        $revision = $this->getRevisionFromHeaders($response);
+
+        $callback->onScanApiRevision($revision);
+        if ($revision !== null) {
+
+            try {
+                $commit = $this->githubApi->getCommit($revision);
+            } catch (RuntimeException) {
+                return;
+            }
+            $this->versionRangeService->setRevisionVersion($this->revisionLookupService->getVersion($commit['sha']));
+            $callback->onScanApiRevisionCommit($commit);
+        }
+
+        $body = (string)$response->getBody();
+
+        try {
+            $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            $callback->onScanApiException($e);
+            return;
+        }
+
+        if (is_array($data) === false || array_key_exists('currentVersion', $data) === false) {
+            return;
+        }
+
+        $apiVersion = $data['currentVersion'];
+
+        $versionRange = $this->apiVersionLookupService->getEtherpadVersionRange($apiVersion);
+        $callback->onScanApiVersion($apiVersion);
+        $this->versionRangeService->addVersionRange($versionRange);
     }
 
     private function getRevisionFromHeaders(ResponseInterface $response): ?string
