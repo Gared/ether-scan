@@ -20,11 +20,10 @@ readonly class PadSocketIoScanner
 
     public function __construct(
         private Client $client,
-        private VersionRangeService $versionRangeService,
     ) {
     }
 
-    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
+    public function scan(Config $config, VersionRangeService $versionRangeService, ScannerServiceCallbackInterface $callback): void
     {
         $callback->onScanPadStart();
         $cookies = new CookieJar();
@@ -37,7 +36,7 @@ readonly class PadSocketIoScanner
             $callback->onScanPadException($e);
         }
 
-        $versionRange = $this->versionRangeService->calculateVersion();
+        $versionRange = $versionRangeService->calculateVersion();
 
         $socketIoVersion = ElephantClient::CLIENT_2X;
         if (version_compare($versionRange?->getMaxVersion() ?? '999', '1.8.0', '<=')) {
@@ -52,7 +51,7 @@ readonly class PadSocketIoScanner
         }
 
         try {
-            $this->connectToPad($socketIoVersion, $cookieString, $callback, $config);
+            $this->connectToPad($socketIoVersion, $cookieString, $callback, $versionRangeService, $config);
         } catch (Exception $e) {
             $callback->onScanPadException($e);
         }
@@ -62,6 +61,7 @@ readonly class PadSocketIoScanner
         int $socketIoVersion,
         string $cookieString,
         ScannerServiceCallbackInterface $callback,
+        VersionRangeService $versionRangeService,
         Config $config,
     ): void {
         $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $config->baseUrl . 'socket.io/', [
@@ -110,7 +110,7 @@ readonly class PadSocketIoScanner
                 $onlyPlugins = $data['data']['plugins']['plugins'];
                 unset($onlyPlugins['ep_etherpad-lite']);
 
-                $this->versionRangeService->setPackageVersion($version);
+                $versionRangeService->setPackageVersion($version);
                 $callback->onClientVars($version, $result->data);
                 $callback->onScanPluginsList($onlyPlugins);
                 $callback->onScanPadSuccess();

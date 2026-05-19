@@ -14,11 +14,10 @@ readonly class HealthScanner
 {
     public function __construct(
         private Client $client,
-        private VersionRangeService $versionRangeService,
     ) {
     }
 
-    public function scan(Config $config, ScannerServiceCallbackInterface $callback): void
+    public function scan(Config $config, VersionRangeService $versionRangeService, ScannerServiceCallbackInterface $callback): void
     {
         try {
             $response = $this->client->get($config->baseUrl . 'health', ['timeout' => $config->timeout]);
@@ -40,6 +39,6 @@ readonly class HealthScanner
         }
 
         $callback->onHealthResult($healthData);
-        $this->versionRangeService->setHealthVersion($healthData['releaseId']);
+        $versionRangeService->setHealthVersion($healthData['releaseId']);
     }
 }

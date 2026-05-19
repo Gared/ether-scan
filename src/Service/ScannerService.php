@@ -24,7 +24,6 @@ class ScannerService
 {
     private readonly Client $client;
     private readonly FileHashLookupService $fileHashLookup;
-    private readonly VersionRangeService $versionRangeService;
     private readonly ApiEndpointScanner $apiEndpointScanner;
     private HealthScanner $healthScanner;
     private PluginDefinitionScanner $pluginDefinitionScanner;
@@ -53,27 +52,23 @@ class ScannerService
         $versionLookup = new ApiVersionLookupService();
         $this->fileHashLookup = new FileHashLookupService();
         $revisionLookup = new RevisionLookupService();
-        $this->versionRangeService = new VersionRangeService();
         $githubApi = new GithubApi();
         $this->apiEndpointScanner = new ApiEndpointScanner(
             $this->client,
-            $this->versionRangeService,
             $revisionLookup,
             $versionLookup,
             $githubApi,
         );
-        $this->healthScanner = new HealthScanner($this->client, $this->versionRangeService);
+        $this->healthScanner = new HealthScanner($this->client);
         $this->pluginDefinitionScanner = new PluginDefinitionScanner($this->client);
         $this->baseUrlScanner = new BaseUrlScanner($this->client);
         $this->staticFilesScanner = new StaticFilesScanner(
             new StaticFileClient($this->client),
             $this->fileHashLookup,
-            $this->versionRangeService
         );
         $this->adminScanner = new AdminScanner($this->client);
         $this->padSocketIoScanner = new PadSocketIoScanner(
             $this->client,
-            $this->versionRangeService,
         );
         $this->statsScanner = new StatsScanner($this->client);
     }
@@ -87,25 +82,26 @@ class ScannerService
         float $timeout = 2.0,
     ): Config {
         $config = new Config($url, $timeout);
+        $versionRangeService = new VersionRangeService();
 
         $this->baseUrlScanner->scan($config);
-        $this->apiEndpointScanner->scan($config, $callback);
-        $this->staticFilesScanner->scan($config);
-        $this->padSocketIoScanner->scan($config, $callback);
-        if ($this->versionRangeService->getPackageVersion() === null) {
+        $this->apiEndpointScanner->scan($config, $versionRangeService, $callback);
+        $this->staticFilesScanner->scan($config, $versionRangeService);
+        $this->padSocketIoScanner->scan($config, $versionRangeService, $callback);
+        if ($versionRangeService->getPackageVersion() === null) {
             $this->pluginDefinitionScanner->scan($config, $callback);
         }
-        $this->healthScanner->scan($config, $callback);
-        $this->progressVersionRanges($callback);
+        $this->healthScanner->scan($config, $versionRangeService, $callback);
+        $this->processVersionRanges($callback, $versionRangeService);
         $this->statsScanner->scan($config, $callback);
         $this->adminScanner->scan($config, $callback);
 
         return $config;
     }
 
-    private function progressVersionRanges(ScannerServiceCallbackInterface $callback): void
+    private function processVersionRanges(ScannerServiceCallbackInterface $callback, VersionRangeService $versionRangeService): void
     {
-        $versionRange = $this->versionRangeService->calculateVersion();
+        $versionRange = $versionRangeService->calculateVersion();
 
         if ($versionRange === null) {
             throw new EtherpadServiceNotFoundException('No version information found');

@@ -22,9 +22,9 @@ class HealthScannerTest extends TestCase
         $callback->expects(self::once())->method('onHealthResult');
         $callback->expects(self::never())->method('onHealthException');
 
-        $scanner = new HealthScanner($client, $versionRangeService);
+        $scanner = new HealthScanner($client);
         $config = new Config('http://example.com');
-        $scanner->scan($config, $callback);
+        $scanner->scan($config, $versionRangeService, $callback);
     }
 
     public function testScanException(): void
@@ -36,8 +36,8 @@ class HealthScannerTest extends TestCase
         $callback->expects(self::never())->method('onHealthResult');
         $callback->expects(self::once())->method('onHealthException');
 
-        $scanner = new HealthScanner($client, $versionRangeService);
+        $scanner = new HealthScanner($client);
         $config = new Config('http://example.com');
-        $scanner->scan($config, $callback);
+        $scanner->scan($config, $versionRangeService, $callback);
     }
 }
