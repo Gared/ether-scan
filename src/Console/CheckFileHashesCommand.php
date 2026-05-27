@@ -37,6 +37,7 @@ class CheckFileHashesCommand extends Command
         $files = FileHashLookupService::getFileNames();
 
         $versionRanges = [];
+        $missingVersionRange = false;
         foreach  ($files as $file) {
             $fileHash = $staticFileClient->getFileHash($url, $file);
             if ($fileHash === null) {
@@ -46,10 +47,14 @@ class CheckFileHashesCommand extends Command
             $versionRange = $fileHashLookup->getEtherpadVersionRange($file, $fileHash);
             if ($versionRange === null) {
                 $output->writeln('<error>No version range for: ' . $file . ' (' . $fileHash . ')</error>');
-                return self::FAILURE;
+                $missingVersionRange = true;
             }
 
             $versionRanges[] = $versionRange;
+        }
+
+        if ($missingVersionRange) {
+            return self::FAILURE;
         }
 
         $versionRange = $this->calculateVersion($versionRanges);

@@ -5,7 +5,6 @@ namespace Gared\EtherScan\Console;
 
 use Gared\EtherScan\Service\StaticFileClient;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -36,7 +35,6 @@ class GenerateFileHashesAllVersionsCommand extends Command
         $instanceResults = new InstanceResults();
 
         $client = new Client([
-            RequestOptions::TIMEOUT => 3.0,
             RequestOptions::CONNECT_TIMEOUT => 1.0,
             'verify' => false,
         ]);
