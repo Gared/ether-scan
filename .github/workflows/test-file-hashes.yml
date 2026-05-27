@@ -29,8 +29,6 @@ jobs:
           { tag: "1.8.5", expected: "1.8.5" },
           { tag: "1.8.4", expected: "1.8.4" },
           { tag: "1.8.3", expected: "1.8.3" },
-          { tag: "1.8.2", expected: "1.8.2" },
-          { tag: "1.8.1", expected: "1.8.1" },
           { tag: "1.8.0", expected: "1.8.0" },
           { tag: "1.7.5", expected: "1.7.5" }
         ]'

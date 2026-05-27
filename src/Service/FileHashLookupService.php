@@ -7,6 +7,18 @@ use Gared\EtherScan\Model\VersionRange;
 
 class FileHashLookupService
 {
+    /*
+     * THESE VERSION OF ETHERPAD DO NOT EXIST:
+     * 2.4.0
+     * 1.8.2
+     * 1.8.1
+     * 1.7.4
+     * 1.7.3
+     * 1.7.2
+     * 1.7.1
+     */
+
+
     /**
      * @var array<string, array<string, array<string|null>>>
      */
@@ -76,7 +88,9 @@ class FileHashLookupService
         ],
         'static/css/pad.css' => [
             'e5358cdcd7fd5ca0cf78f8a086f38e37' => [null, '1.7.5'],
-            'fa9b86351b6a5b065fc4d7d48eebdb68' => ['1.8.0', '1.8.2'],
+            'fa9b86351b6a5b065fc4d7d48eebdb68' => ['1.8.0', '1.8.0'],
+            'ed59aa9608076088d4efa64537531b9e' => ['1.8.3', '1.8.3'],
+            '1de9d71d9ee597f486ea4a0fe7e2b833' => ['1.8.4', '1.8.4'],
             'fd7747a23a18d33c80ea795e3af546fd' => ['1.8.5', '1.8.6'],
             '56a9cf146fba672ca79f71105e336898' => ['1.8.10', '1.8.12'],
             '04a926d64574997b5b3e377e8220dd25' => ['1.8.16', '1.8.18'],
@@ -95,7 +109,10 @@ class FileHashLookupService
         'static/css/iframe_editor.css' => [
             '311d86de82a2adc7d9a1f5da4a3411f7' => ['1.7.0', '1.8.0'],
             '7b351e389b30c362651e4b56d7e7171c' => ['1.7.0', '1.8.0'],
+            'f5e06bf8fcd57a06228045f3c07b7858' => ['1.8.3', '1.8.3'],
+            'ee5130ca8f138a5e0290b1025b1dd4ab' => ['1.8.4', '1.8.4'],
             '3ec8d698cedd2503c9c2b26256282a01' => ['1.8.5', '1.8.5'],
+            'ce9a5f4c8e470a4d5a45417e018c1b1b' => ['1.8.6', '1.8.7'],
             '6950802f6ea28bb964c4581e9ff54c3c' => ['1.8.8', '1.8.12'],
             '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],
             'a24f0ca1e53c175e1bf091f74df37e2b' => ['2.2.2', '2.5.0'],

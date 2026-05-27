@@ -48,9 +48,9 @@ class CheckFileHashesCommand extends Command
             if ($versionRange === null) {
                 $output->writeln('<error>No version range for: ' . $file . ' (' . $fileHash . ')</error>');
                 $missingVersionRange = true;
+            } else {
+                $versionRanges[] = $versionRange;
             }
-
-            $versionRanges[] = $versionRange;
         }
 
         if ($missingVersionRange) {
