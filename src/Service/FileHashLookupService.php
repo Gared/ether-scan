@@ -79,8 +79,11 @@ class FileHashLookupService
             '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
             '12ba3a5933f399b882cf847d407c31f0' => ['2.4.1', '2.5.1'],
             '53c72fe8218c95773dcfce173dacb3f6' => ['2.5.2', '2.6.1'],
-            '38cff1ae26208862112021f063b361a4' => ['2.7.0', '2.7.3'],
-            'c844c72dc38ff4fc8da493d2dabb50aa' => ['3.0.0', null],
+            '38cff1ae26208862112021f063b361a4' => ['2.7.0', '2.7.1'],
+            'f9343476e0a4b6578098536ad5c9ed62' => ['2.7.2', '2.7.2'],
+            '9be2a297a0de28ee53a2eb46efa45ac2' => ['2.7.3', '2.7.3'],
+            'c844c72dc38ff4fc8da493d2dabb50aa' => ['3.0.0', '3.1.0'],
+            '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', null],
         ],
         'static/css/iframe_editor.css' => [
             '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],
@@ -89,7 +92,8 @@ class FileHashLookupService
             '09d9db766fe56a55dcfe891a7cc5248a' => ['2.7.0', null],
         ],
         'static/skins/colibris/index.js' => [
-            'd11af9dc26b766206e094627884763f3' => ['2.4.2', '2.5.3'],
+            '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
+            'd11af9dc26b766206e094627884763f3' => ['2.4.1', '2.5.3'],
             '0c33c52671cde06391b20a1c868d643b' => ['2.6.0', null],
         ],
     ];
