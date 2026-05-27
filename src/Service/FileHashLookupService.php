@@ -93,6 +93,7 @@ class FileHashLookupService
             '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', null],
         ],
         'static/css/iframe_editor.css' => [
+            '311d86de82a2adc7d9a1f5da4a3411f7' => ['1.7.0', '1.8.0'],
             '7b351e389b30c362651e4b56d7e7171c' => ['1.7.0', '1.8.0'],
             '3ec8d698cedd2503c9c2b26256282a01' => ['1.8.5', '1.8.5'],
             '6950802f6ea28bb964c4581e9ff54c3c' => ['1.8.8', '1.8.12'],
@@ -104,7 +105,7 @@ class FileHashLookupService
         'static/skins/colibris/index.js' => [
             '684b186576273dbfe80db52edd25036e' => ['1.7.5', '1.8.4'],
             '823cd50b71738ec3b9caf4f5d58da6bb' => ['1.8.5', '1.8.6'],
-            'a23fe728e4d4dfa90c7baa331a16e87f' => ['1.8.12', '2.1.0'],
+            'a23fe728e4d4dfa90c7baa331a16e87f' => ['1.8.10', '2.1.0'],
             'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
             '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
             'd11af9dc26b766206e094627884763f3' => ['2.4.1', '2.5.3'],
