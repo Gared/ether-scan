@@ -11,3 +11,4 @@ services:
         image: etherpad/etherpad:$EP_VERSION
         environment:
             - TRUST_PROXY=true
+            - MINIFY=false
