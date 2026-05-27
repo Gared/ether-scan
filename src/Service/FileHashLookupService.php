@@ -60,6 +60,7 @@ class FileHashLookupService
             '5ed224a48ab04f1436f77372be2bfb4e' => ['2.2.2', '2.2.2'],
         ],
         'static/js/pad_utils.js' => [
+            'e807f5a0eda9d82a6ecb695afa8a45cb' => ['1.6.5', '1.8.0'],
             'a7072962ca5031754c382373fc6fceb9' => [null, '1.8.0'],
             'da1ffbda8e0cf83820559e829b259de9' => ['1.8.3', '1.8.3'],
             'd7ef66be49dd94a1a10562fe83e1f2de' => ['1.8.4', '1.8.4'],
@@ -75,7 +76,9 @@ class FileHashLookupService
         ],
         'static/css/pad.css' => [
             '23cf9d22181eb3a93b9ef7ec2af47fb8' => [null, '1.7.5'],
+            'fa9b86351b6a5b065fc4d7d48eebdb68' => ['1.8.0', null],
             'fd7747a23a18d33c80ea795e3af546fd' => ['1.8.5', '1.8.6'],
+            '56a9cf146fba672ca79f71105e336898' => ['1.8.10', '1.8.12'],
             '04a926d64574997b5b3e377e8220dd25' => ['1.8.16', '1.8.18'],
             '169c79ec1a44c5c45dfce64c0f62c7ef' => ['1.9.0', '1.9.7'],
             '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
@@ -90,6 +93,7 @@ class FileHashLookupService
             '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', null],
         ],
         'static/css/iframe_editor.css' => [
+            '3ec8d698cedd2503c9c2b26256282a01' => ['1.8.5', '1.8.5'],
             '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],
             'a24f0ca1e53c175e1bf091f74df37e2b' => ['2.2.2', '2.5.0'],
             'eb6c3b471926190b8059f49202465b5c' => ['2.5.2', '2.6.1'],
