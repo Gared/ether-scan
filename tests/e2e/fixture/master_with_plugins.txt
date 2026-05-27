@@ -9,6 +9,8 @@ Starting scan of api: http://localhost:9001/
 Starting scan of a pad...
 =========================
 
+ [INFO] Title: Etherpad
+
  [OK] Websocket is supported
 
 
