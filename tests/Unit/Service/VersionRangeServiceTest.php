@@ -140,6 +140,15 @@ class VersionRangeServiceTest extends TestCase
             '2.0.0',
             '2.2.1',
         ];
+
+        yield 'version ranges with collision will result in higher version' => [
+            [
+                new VersionRange('1.0.0', '1.9.5'),
+                new VersionRange('2.0.0', '2.1.0'),
+            ],
+            '2.0.0',
+            '2.0.0',
+        ];
     }
 }
 

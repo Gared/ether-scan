@@ -8,6 +8,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -19,7 +20,8 @@ class ScanCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addArgument('url', InputArgument::REQUIRED, 'Url to etherpad instance');
+        $this->addArgument('url', InputArgument::REQUIRED, 'Url to etherpad instance')
+            ->addOption('timeout', 't', InputOption::VALUE_REQUIRED, 'Timeout (in seconds)', '5.0');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -30,6 +32,7 @@ class ScanCommand extends Command
         $scanner->scan(
             url: $input->getArgument('url'),
             callback: $outputHelper,
+            timeout: (float) $input->getOption('timeout'),
         );
 
         return self::SUCCESS;
