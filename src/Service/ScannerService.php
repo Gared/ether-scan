@@ -79,7 +79,7 @@ class ScannerService
     public function scan(
         string $url,
         ScannerServiceCallbackInterface $callback,
-        float $timeout = 2.0,
+        float $timeout = 5.0,
     ): Config {
         $config = new Config($url, $timeout);
         $versionRangeService = new VersionRangeService();

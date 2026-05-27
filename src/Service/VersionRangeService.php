@@ -49,6 +49,10 @@ class VersionRangeService
             }
         }
 
+        if ($minVersion !== null && $maxVersion !== null && version_compare($maxVersion, $minVersion, '<')) {
+            $maxVersion = $minVersion;
+        }
+
         return new VersionRange($minVersion, $maxVersion);
     }
 
