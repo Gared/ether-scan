@@ -5,6 +5,7 @@ namespace Gared\EtherScan\Tests\Unit\Service;
 
 use Gared\EtherScan\Model\VersionRange;
 use Gared\EtherScan\Service\VersionRangeService;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -74,18 +75,43 @@ class VersionRangeServiceTest extends TestCase
         self::assertSame('3.0.0', $result->getMaxVersion());
     }
 
-    public function testCalculateVersionUsesHigherVersionOnCollision(): void
+    #[DataProvider('getVersionRangesWithCollisions')]
+    public function testCalculateVersionWithCollisionCauseException(array $versionRanges): void
     {
         $service = new VersionRangeService();
-        $service->addVersionRange(new VersionRange('1.9.0', '1.9.5'));
-        $service->addVersionRange(new VersionRange('2.0.0', null));
-        $service->addVersionRange(new VersionRange('1.6.0', '1.7.0'));
+        foreach ($versionRanges as $versionRange) {
+            $service->addVersionRange($versionRange);
+        }
 
-        $result = $service->calculateVersion();
+        self::expectException(InvalidArgumentException::class);
 
-        self::assertInstanceOf(VersionRange::class, $result);
-        self::assertSame('2.0.0', $result->getMinVersion());
-        self::assertSame(null, $result->getMaxVersion());
+        $service->calculateVersion();
+    }
+
+    public static function getVersionRangesWithCollisions(): iterable
+    {
+        yield 'version ranges with only two ranges' => [
+            [
+                new VersionRange('1.0.0', '1.9.5'),
+                new VersionRange('2.0.0', '2.1.0'),
+            ],
+        ];
+
+        yield 'version range with three collisions and null' => [
+            [
+                new VersionRange('1.9.0', '1.9.5'),
+                new VersionRange('2.0.0', null),
+                new VersionRange('1.6.0', '1.7.0'),
+            ],
+        ];
+
+        yield 'version ranges with three collisions' => [
+            [
+                new VersionRange('1.9.0', '1.9.5'),
+                new VersionRange('2.0.0', '2.1.0'),
+                new VersionRange('1.6.0', '1.7.0'),
+            ],
+        ];
     }
 
     public function testAddVersionRangeIgnoresNull(): void
@@ -139,15 +165,6 @@ class VersionRangeServiceTest extends TestCase
             ],
             '2.0.0',
             '2.2.1',
-        ];
-
-        yield 'version ranges with collision will result in higher version' => [
-            [
-                new VersionRange('1.0.0', '1.9.5'),
-                new VersionRange('2.0.0', '2.1.0'),
-            ],
-            '2.0.0',
-            '2.0.0',
         ];
     }
 }
