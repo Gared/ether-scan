@@ -138,6 +138,11 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
         $this->symfonyStyle->error($e->getMessage());
     }
 
+    public function onScanPadTitle(string $title): void
+    {
+        $this->symfonyStyle->info('Title: ' . $title);
+    }
+
     public function onScanPadSuccess(): void
     {
         $this->symfonyStyle->success('Pads are publicly accessible');
