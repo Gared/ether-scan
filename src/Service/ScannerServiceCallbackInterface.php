@@ -55,6 +55,8 @@ interface ScannerServiceCallbackInterface
 
     public function onScanPadException(Throwable $e): void;
 
+    public function onScanPadTitle(string $title): void;
+
     public function onScanPadSuccess(): void;
 
     public function onConnectedTransport(bool $usedWebsocket): void;

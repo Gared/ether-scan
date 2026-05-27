@@ -28,10 +28,16 @@ readonly class PadSocketIoScanner
         $callback->onScanPadStart();
         $cookies = new CookieJar();
         try {
-            $this->client->get($config->baseUrl . $config->pathPrefix . $config->padId, [
+            $response = $this->client->get($config->baseUrl . $config->pathPrefix . $config->padId, [
                 'cookies' => $cookies,
                 'timeout' => $config->timeout,
             ]);
+
+            $body = (string) $response->getBody();
+            $result = preg_match('/<title[^>]*>(?<title>.*?)<\/title>/i', $body, $matches);
+            if ($result !== false) {
+                $callback->onScanPadTitle($matches['title']);
+            }
         } catch (GuzzleException $e) {
             $callback->onScanPadException($e);
         }
