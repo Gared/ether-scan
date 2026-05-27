@@ -40,6 +40,7 @@ class FileHashLookupService
             '33c2045f954bce58d7f5ac17aa1d7f04' => ['2.1.1', null],
         ],
         'static/js/pad.js' => [
+            'e8a320953f1947cf31cf2a8546bd59dd' => [null, '1.7.5'],
             'c0d22189c3497e2da29607f5cb6f47b1' => [null, '1.8.0'],
             '1904f2b800ef8ffcfef636e39409bfe9' => ['1.8.3', '1.8.3'],
             'f917bf95a0593b8cf6c316caf782a547' => ['1.8.4', '1.8.4'],
@@ -56,7 +57,7 @@ class FileHashLookupService
             'c643215708e10eea297d27e9b2f764f0' => ['2.0.0', '2.0.2'],
             'b022b626a88d09c7b9f0ab27b34eaa82' => ['2.0.3', '2.1.0'],
             'd9be661d2b7120ffbb06797c66a7a3d7' => ['2.1.1', '2.1.1'],
-            '5ed224a48ab04f1436f77372be2bfb4e' => ['2.2.2', null],
+            '5ed224a48ab04f1436f77372be2bfb4e' => ['2.2.2', '2.2.2'],
         ],
         'static/js/pad_utils.js' => [
             'a7072962ca5031754c382373fc6fceb9' => [null, '1.8.0'],
@@ -73,7 +74,10 @@ class FileHashLookupService
             'a9aa5b16c8e3ff79933156220cb87dbf' => ['2.2.2', '2.2.2'],
         ],
         'static/css/pad.css' => [
-            '169c79ec1a44c5c45dfce64c0f62c7ef' => [null, '1.9.7'],
+            '23cf9d22181eb3a93b9ef7ec2af47fb8' => [null, '1.7.5'],
+            'fd7747a23a18d33c80ea795e3af546fd' => ['1.8.5', '1.8.6'],
+            '04a926d64574997b5b3e377e8220dd25' => ['1.8.16', '1.8.18'],
+            '169c79ec1a44c5c45dfce64c0f62c7ef' => ['1.9.0', '1.9.7'],
             '2a37d1ffbd906c905fe7f1b42564caa5' => ['2.0.0', '2.1.0'],
             '8fab111c95434eac9414f0d8ea5d81b8' => ['2.1.1', '2.1.1'],
             '8ae26862f7716d1bada457fdc92bb1d1' => ['2.2.2', '2.3.2'],
@@ -92,6 +96,9 @@ class FileHashLookupService
             '09d9db766fe56a55dcfe891a7cc5248a' => ['2.7.0', null],
         ],
         'static/skins/colibris/index.js' => [
+            '684b186576273dbfe80db52edd25036e' => ['1.7.5', '1.8.9'],
+            'a23fe728e4d4dfa90c7baa331a16e87f' => ['1.8.12', '2.1.0'],
+            'eb3857ee08d0c2217649dcb61b1c8e73' => ['2.1.1', '2.2.7'],
             '3c8e220b7dc756c1550a5e7148ecd5c5' => ['2.3.0', '2.3.2'],
             'd11af9dc26b766206e094627884763f3' => ['2.4.1', '2.5.3'],
             '0c33c52671cde06391b20a1c868d643b' => ['2.6.0', null],
