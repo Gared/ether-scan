@@ -4,5 +4,10 @@ services:
         entrypoint: /bin/sh -c "pnpm run plugins i ep_align ep_headings2 ep_font_color ep_adminpads2 ep_comments_page ep_font_size ep_markdown && ${ORIGINAL_CMD}"
         environment:
           - EDIT_ONLY=${EDIT_ONLY}
+        healthcheck:
+          retries: 5
+          start_interval: 15s
+          start_period: 1m
+          test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9002/health | grep -E 'pass|ok|up' > /dev/null || exit 1"]
         ports:
           - 9001:9001
