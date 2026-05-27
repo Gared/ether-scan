@@ -36,10 +36,6 @@ class VersionRangeService
         $maxVersion = null;
         $minVersion = null;
         foreach ($this->versionRanges as $version) {
-            if ($minVersion !== null && $version->getMaxVersion() !== null && version_compare($version->getMaxVersion(), $minVersion, '<')) {
-                continue;
-            }
-
             if ($maxVersion === null || version_compare($version->getMaxVersion() ?? '', $maxVersion, '<')) {
                 $maxVersion = $version->getMaxVersion();
             }
@@ -47,10 +43,6 @@ class VersionRangeService
             if ($minVersion === null || version_compare($version->getMinVersion() ?? '', $minVersion, '>')) {
                 $minVersion = $version->getMinVersion();
             }
-        }
-
-        if ($minVersion !== null && $maxVersion !== null && version_compare($maxVersion, $minVersion, '<')) {
-            $maxVersion = $minVersion;
         }
 
         return new VersionRange($minVersion, $maxVersion);
@@ -74,6 +66,11 @@ class VersionRangeService
     public function setHealthVersion(?string $healthVersion): void
     {
         $this->healthVersion = $healthVersion;
+    }
+
+    public function getHealthVersion(): ?string
+    {
+        return $this->healthVersion;
     }
 
     public function addVersionRange(?VersionRange $versionRange): void

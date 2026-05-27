@@ -36,25 +36,22 @@ readonly class PadSocketIoScanner
             $callback->onScanPadException($e);
         }
 
-        $versionRange = $versionRangeService->calculateVersion();
-
-        $socketIoVersion = ElephantClient::CLIENT_2X;
-        if (version_compare($versionRange?->getMaxVersion() ?? '999', '1.8.0', '<=')) {
-            $socketIoVersion = ElephantClient::CLIENT_1X;
-        } else if (version_compare($versionRange?->getMinVersion() ?? '0.1', '2.0.0', '>=')) {
-            $socketIoVersion = ElephantClient::CLIENT_4X;
-        }
-
         $cookieString = '';
         foreach ($cookies as $cookie) {
             $cookieString .= $cookie->getName() . '=' . $cookie->getValue() . ';';
         }
 
-        try {
-            $this->connectToPad($socketIoVersion, $cookieString, $callback, $versionRangeService, $config);
-        } catch (Exception $e) {
-            $callback->onScanPadException($e);
+        $testVersions = [ElephantClient::CLIENT_4X, ElephantClient::CLIENT_2X, ElephantClient::CLIENT_1X];
+        foreach ($testVersions as $socketIoVersion) {
+            try {
+                $this->connectToPad($socketIoVersion, $cookieString, $callback, $versionRangeService, $config);
+                return;
+            } catch (Exception $e) {
+                // try next
+            }
         }
+
+        $callback->onScanPadException($e);
     }
 
     private function connectToPad(
@@ -72,6 +69,7 @@ readonly class PadSocketIoScanner
                     'verify_peer_name' => false,
                 ],
             ],
+            'timeout' => $config->timeout,
             'headers' => [
                 'Cookie' => $cookieString,
             ]

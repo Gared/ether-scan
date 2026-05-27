@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Console;
 
+use Gared\EtherScan\Service\StaticFileClient;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,8 +34,14 @@ class GenerateFileHashesAllVersionsCommand extends Command
         $allInstances = $this->getInstances();
         $instanceResults = new InstanceResults();
 
+        $client = new Client([
+            RequestOptions::CONNECT_TIMEOUT => 1.0,
+            'verify' => false,
+        ]);
+        $staticFileClient = new StaticFileClient($client);
+
         foreach ($this->getAllVersions($allInstances) as $version) {
-            $this->scanVersionInstances($allInstances, $version, $filePath, $instanceResults, $output, $countVersionsMatch);
+            $this->scanVersionInstances($staticFileClient, $allInstances, $version, $filePath, $instanceResults, $output, $countVersionsMatch);
         }
 
         $listInstances = $instanceResults->getInstancesByVersion();
@@ -103,17 +109,16 @@ class GenerateFileHashesAllVersionsCommand extends Command
     /**
      * @param list<array{name: string, scan: array<mixed>}> $allInstances
      */
-    private function scanVersionInstances(array $allInstances, string $version, string $file, InstanceResults $instanceResults, OutputInterface $output, int $countVersionsMatchNeeded): void
+    private function scanVersionInstances(StaticFileClient $staticFileClient, array $allInstances, string $version, string $file, InstanceResults $instanceResults, OutputInterface $output, int $countVersionsMatchNeeded): void
     {
         $foundMatchesForHash = [];
         $scannedInstances = 0;
 
         foreach ($this->getInstancesByVersion($allInstances, $version) as $instance) {
-            $fileContent = $this->getFile($instance['name'], $file);
-            $fileHash = $fileContent !== null ? hash('md5', $fileContent) : null;
+            $fileHash = $staticFileClient->getFileHash($instance['name'], $file);
             $scannedInstances++;
 
-            $instanceResult = new InstanceResult($instance['name'], $version, $fileHash, $fileContent);
+            $instanceResult = new InstanceResult($instance['name'], $version, $fileHash, $staticFileClient->getLastResponse());
 
             if ($instanceResult->fileHash === null) {
                 $output->writeln('<error>Could not get hash for instance ' . $instance['name'] . '</error>', OutputInterface::VERBOSITY_VERY_VERBOSE);
@@ -197,26 +202,5 @@ class GenerateFileHashesAllVersionsCommand extends Command
         $body = (string)$response->getBody();
         $data = json_decode($body, true);
         return $data['instances'] ?? [];
-    }
-
-    private function getFile(string $url, string $path): ?string
-    {
-        try {
-            $client = new Client([
-                'base_uri' => $url,
-                RequestOptions::TIMEOUT => 3.0,
-                RequestOptions::CONNECT_TIMEOUT => 1.0,
-                'verify' => false,
-//                'debug' => true,
-            ]);
-            $response = $client->get($path, [
-                'headers' => ['Accept-Encoding' => 'gzip'],
-            ]);
-
-            return (string)$response->getBody();
-        } catch (GuzzleException) {
-        }
-
-        return null;
     }
 }

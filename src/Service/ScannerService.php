@@ -19,6 +19,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
+use InvalidArgumentException;
 
 class ScannerService
 {
@@ -101,7 +102,11 @@ class ScannerService
 
     private function processVersionRanges(ScannerServiceCallbackInterface $callback, VersionRangeService $versionRangeService): void
     {
-        $versionRange = $versionRangeService->calculateVersion();
+        try {
+            $versionRange = $versionRangeService->calculateVersion();
+        } catch (InvalidArgumentException $e) {
+            throw new EtherpadServiceNotFoundException('Conflicting version information found', 0, $e);
+        }
 
         if ($versionRange === null) {
             throw new EtherpadServiceNotFoundException('No version information found');
