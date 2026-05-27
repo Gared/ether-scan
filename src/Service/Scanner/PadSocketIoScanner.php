@@ -35,7 +35,7 @@ readonly class PadSocketIoScanner
 
             $body = (string) $response->getBody();
             $result = preg_match('/<title[^>]*>(?<title>.*?)<\/title>/i', $body, $matches);
-            if ($result !== false) {
+            if ($result !== false && isset($matches['title'])) {
                 $callback->onScanPadTitle($matches['title']);
             }
         } catch (GuzzleException $e) {
