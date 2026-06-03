@@ -3,11 +3,16 @@ declare(strict_types=1);
 
 namespace Gared\EtherScan\Console;
 
+use Gared\EtherScan\Service\FileHashLookupService;
 use Gared\EtherScan\Service\StaticFileClient;
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,16 +38,28 @@ class GenerateFileHashesAllVersionsCommand extends Command
 
         $allInstances = $this->getInstances();
         $instanceResults = new InstanceResults();
+        $fileHashLookupService = new FileHashLookupService();
+
+        $stack = new HandlerStack(Utils::chooseHandler());
+        $stack->push(Middleware::httpErrors(), 'http_errors');
 
         $client = new Client([
             RequestOptions::CONNECT_TIMEOUT => 1.0,
             'verify' => false,
+            'handler' => $stack,
         ]);
         $staticFileClient = new StaticFileClient($client);
 
-        foreach ($this->getAllVersions($allInstances) as $version) {
+        $allVersions = $this->getAllVersions($allInstances);
+        $versionProgressBar = new ProgressBar($output, count($allVersions));
+        $versionProgressBar->setFormat(' %current%/%max% - %message% [%bar%] %percent:3s%%');
+
+        foreach ($versionProgressBar->iterate($allVersions) as $version) {
+            $versionProgressBar->setMessage($version);
             $this->scanVersionInstances($staticFileClient, $allInstances, $version, $filePath, $instanceResults, $output, $countVersionsMatch);
         }
+
+        $output->writeln('');
 
         $listInstances = $instanceResults->getInstancesByVersion();
         uksort($listInstances, function ($a, $b) {
@@ -81,14 +98,37 @@ class GenerateFileHashesAllVersionsCommand extends Command
                 $versionString = '<error>' . $version . '</error>';
             }
 
-            $table->addRow([$versionString, count($instances), ...$fileHashes]);
+            $mappedFileHashesWithCount = array_map(
+                function ($fileHash) use ($fileHashesWithCount, $instances, $output) {
+                    $lineCount = null;
+                    $fileContent = null;
+                    $length = null;
+                    foreach ($instances as $instance) {
+                        if ($instance->fileHash === $fileHash) {
+                            $responseBody = (string) $instance->response?->getBody();
+                            $lineCount = mb_substr_count($responseBody, "\n");
+                            $fileContent = mb_substr($responseBody, 0, 100);
+                            $length = mb_strlen($responseBody);
+                        }
+                    }
+
+                    $info = $lineCount . ' lines (' . $length . ' chars) ' . $fileHash . ' x ' . $fileHashesWithCount[$fileHash];
+                    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        return $info . PHP_EOL . $fileContent;
+                    }
+                    return $info;
+                },
+                array_keys($fileHashesWithCount),
+                $fileHashesWithCount
+            );
+            $table->addRow([$versionString, count($instances), ...$mappedFileHashesWithCount]);
         }
 
         $table->render();
 
 
         $table = new Table($output);
-        $table->setHeaders(['File Hash', 'Minimum Version', 'Maximum Version']);
+        $table->setHeaders(['File Hash', 'Min (calculated)', 'Max (calculated)', 'Lookup Min', 'Lookup Max', 'Status']);
 
         foreach ($versionRanges as $fileHash => $versions) {
             usort($versions, function ($a, $b) {
@@ -98,7 +138,29 @@ class GenerateFileHashesAllVersionsCommand extends Command
             $minimumVersion = $versions[array_key_first($versions)];
             $maximumVersion = $versions[array_key_last($versions)];
 
-            $table->addRow([$fileHash, $minimumVersion, $maximumVersion]);
+            $lookupRange = $fileHashLookupService->getEtherpadVersionRange($filePath, $fileHash);
+
+            if ($lookupRange === null) {
+                $lookupMin = '<comment>unknown</comment>';
+                $lookupMax = '<comment>unknown</comment>';
+                $status = '<comment>NOT IN LOOKUP</comment>';
+            } else {
+                $lookupMin = $lookupRange->getMinVersion() ?? '*';
+                $lookupMax = $lookupRange->getMaxVersion() ?? '*';
+
+                $minMatches = $lookupRange->getMinVersion() === $minimumVersion;
+                $maxMatches = $lookupRange->getMaxVersion() === $maximumVersion;
+
+                if ($minMatches && $maxMatches) {
+                    $status = '<info>✓ MATCH</info>';
+                } else {
+                    $status = '<error>✗ MISMATCH</error>';
+                    $lookupMin = $minMatches ? $lookupMin : '<error>' . $lookupMin . '</error>';
+                    $lookupMax = $maxMatches ? $lookupMax : '<error>' . $lookupMax . '</error>';
+                }
+            }
+
+            $table->addRow([$fileHash, $minimumVersion, $maximumVersion, $lookupMin, $lookupMax, $status]);
         }
 
         $table->render();
@@ -131,7 +193,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
             }
 
             if ($this->matches($instanceResults, $instanceResult, $version)) {
-                $output->writeln('Match found for version ' . $version . ' and hash ' . $instanceResult->fileHash);
+                $output->writeln('Match found for version ' . $version . ' and hash ' . $instanceResult->fileHash, OutputInterface::VERBOSITY_VERBOSE);
 
                 if (!isset($foundMatchesForHash[$instanceResult->fileHash])) {
                     $foundMatchesForHash[$instanceResult->fileHash] = 0;
@@ -197,7 +259,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
     private function getInstances(): array
     {
         $client = new Client();
-        $response = $client->get('https://ether-scan.stefans-entwicklerecke.de/api/instances');
+        $response = $client->get('https://ether-scan.stefans-entwicklerecke.de/api/instances?filterPackageVersion=1');
 
         $body = (string)$response->getBody();
         $data = json_decode($body, true);

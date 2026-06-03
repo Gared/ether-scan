@@ -16,12 +16,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
-class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
+readonly class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 {
+    private ConsoleLogger $consoleLogger;
+
     public function __construct(
-        private readonly SymfonyStyle $symfonyStyle,
-        private readonly OutputInterface $output,
+        private SymfonyStyle $symfonyStyle,
+        private OutputInterface $output,
     ) {
+        $this->consoleLogger = new ConsoleLogger($this->output);
     }
 
     public function onScanApiStart(string $baseUrl): void
@@ -193,6 +196,6 @@ class ScanCommandOutputHelper implements ScannerServiceCallbackInterface
 
     public function getConsoleLogger(): ?LoggerInterface
     {
-        return new ConsoleLogger($this->output);
+        return $this->consoleLogger;
     }
 }

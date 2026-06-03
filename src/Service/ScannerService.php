@@ -87,7 +87,7 @@ class ScannerService
 
         $this->baseUrlScanner->scan($config);
         $this->apiEndpointScanner->scan($config, $versionRangeService, $callback);
-        $this->staticFilesScanner->scan($config, $versionRangeService);
+        $this->staticFilesScanner->scan($config, $versionRangeService, $callback);
         $this->padSocketIoScanner->scan($config, $versionRangeService, $callback);
         if ($versionRangeService->getPackageVersion() === null) {
             $this->pluginDefinitionScanner->scan($config, $callback);
