@@ -6,6 +6,10 @@ namespace Gared\EtherScan\Console;
 use Gared\EtherScan\Service\FileHashLookupService;
 use Gared\EtherScan\Service\StaticFileClient;
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,8 +32,17 @@ class GenerateFileHashesCommand extends Command
     {
         $url = $input->getArgument('url');
 
+        $stack = new HandlerStack(Utils::chooseHandler());
+        $stack->push(Middleware::httpErrors(), 'http_errors');
+
+        $client = new Client([
+            RequestOptions::CONNECT_TIMEOUT => 1.0,
+            'verify' => false,
+            'handler' => $stack,
+        ]);
+
         $fileHashLookup = new FileHashLookupService();
-        $staticFileClient = new StaticFileClient(new Client());
+        $staticFileClient = new StaticFileClient($client);
 
         $files = FileHashLookupService::getFileNames();
 
