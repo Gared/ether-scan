@@ -197,7 +197,7 @@ class GenerateFileHashesAllVersionsCommand extends Command
     private function getInstances(): array
     {
         $client = new Client();
-        $response = $client->get('https://ether-scan.stefans-entwicklerecke.de/api/instances');
+        $response = $client->get('https://ether-scan.stefans-entwicklerecke.de/api/instances?filterPackageVersion=1');
 
         $body = (string)$response->getBody();
         $data = json_decode($body, true);

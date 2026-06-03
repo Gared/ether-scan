@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 
 class StaticFileClient
@@ -20,20 +20,25 @@ class StaticFileClient
     public function getFileHash(
         string $baseUrl,
         string $path,
-        float $timeout = 5.0
+        float $timeout = 5.0,
+        ?ScannerServiceCallbackInterface $callback = null,
     ): ?string {
         $this->lastResponse = null;
 
         try {
             $response = $this->client->get($path, [
                 'base_uri' => $baseUrl,
-                'headers' => ['Accept-Encoding' => 'gzip'],
-                'timeout' => $timeout,
+                RequestOptions::HEADERS => ['Accept-Encoding' => 'gzip'],
+                RequestOptions::TIMEOUT => $timeout,
             ]);
-            $this->lastResponse = $response;
             $body = (string) $response->getBody();
+
+            $callback?->getConsoleLogger()?->debug('Fetched file: ' . $baseUrl . '/' . $path . ':' . PHP_EOL . '(chars: ' . mb_strlen($body) . '): ' . mb_substr($body, 0, 100));
+
+            $this->lastResponse = $response;
             return hash('md5', $body);
-        } catch (GuzzleException) {
+        } catch (GuzzleException $e) {
+            $callback?->getConsoleLogger()?->debug('Could not load file: ' . $baseUrl . '/' . $path . ': ' . $e->getMessage());
         }
 
         return null;
