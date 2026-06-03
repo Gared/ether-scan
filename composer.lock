@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "14bede85f243275277ce6eced95ce656",
+    "content-hash": "52669065818b1afb60723696e8aaecef",
     "packages": [
         {
             "name": "elephantio/elephant.io",
