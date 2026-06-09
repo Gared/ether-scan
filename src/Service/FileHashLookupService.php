@@ -104,7 +104,8 @@ class FileHashLookupService
             'f9343476e0a4b6578098536ad5c9ed62' => ['2.7.2', '2.7.2'],
             '9be2a297a0de28ee53a2eb46efa45ac2' => ['2.7.3', '2.7.3'],
             'c844c72dc38ff4fc8da493d2dabb50aa' => ['3.0.0', '3.1.0'],
-            '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', null],
+            '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', '3.2.0'],
+            'c9f74c129a656b4af12ee21b473cd9e5' => ['3.3.0', null],
         ],
         'static/css/iframe_editor.css' => [
             '311d86de82a2adc7d9a1f5da4a3411f7' => ['1.7.0', '1.8.0'],
@@ -117,7 +118,8 @@ class FileHashLookupService
             '61118ff9a0beeea3203f60aa8888166f' => ['1.8.14', '2.1.0'],
             'a24f0ca1e53c175e1bf091f74df37e2b' => ['2.2.2', '2.5.0'],
             'eb6c3b471926190b8059f49202465b5c' => ['2.5.2', '2.6.1'],
-            '09d9db766fe56a55dcfe891a7cc5248a' => ['2.7.0', null],
+            '09d9db766fe56a55dcfe891a7cc5248a' => ['2.7.0', '3.2.0'],
+            'dd85916a07e7759150d389a9c6416ff7' => ['3.3.0', null],
         ],
     ];
 
