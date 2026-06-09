@@ -14,17 +14,18 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        cache_dir="/tmp/ether-scan-image-cache"
         sanitized_image="${{ inputs.image }}"
         sanitized_image="${sanitized_image//\//-}"
         sanitized_image="${sanitized_image//:/-}"
-        echo "file=~/image-cache/${sanitized_image}.tar" >> "$GITHUB_OUTPUT"
+        echo "file=${cache_dir}/${sanitized_image}.tar" >> "$GITHUB_OUTPUT"
         echo "key=docker-image-${{ runner.os }}-${sanitized_image}" >> "$GITHUB_OUTPUT"
 
     - name: Check cache for Docker image
       id: docker-image-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
-        path: ~/image-cache
+        path: /tmp/ether-scan-image-cache
         key: ${{ steps.cache-file.outputs.key }}
 
     - name: Load cached Docker image
@@ -37,7 +38,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        mkdir -p ~/image-cache
+        mkdir -p /tmp/ether-scan-image-cache
         docker pull "${{ inputs.image }}"
         docker image save "${{ inputs.image }}" --output "${{ steps.cache-file.outputs.file }}"
 
