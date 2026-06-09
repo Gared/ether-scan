@@ -1,0 +1,57 @@
+name: Prepare E2E environment
+description: Cache Docker image, cache Composer packages, and install PHP dependencies
+
+inputs:
+  image:
+    description: Docker image reference including tag (e.g. etherpad/etherpad:2.7.2)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve cache file name
+      id: cache-file
+      shell: bash
+      run: |
+        set -euo pipefail
+        sanitized_image="${{ inputs.image }}"
+        sanitized_image="${sanitized_image//\//-}"
+        sanitized_image="${sanitized_image//:/-}"
+        echo "file=~/image-cache/${sanitized_image}.tar" >> "$GITHUB_OUTPUT"
+        echo "key=docker-image-${{ runner.os }}-${sanitized_image}" >> "$GITHUB_OUTPUT"
+
+    - name: Check cache for Docker image
+      id: docker-image-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/image-cache
+        key: ${{ steps.cache-file.outputs.key }}
+
+    - name: Load cached Docker image
+      if: steps.docker-image-cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: docker image load --input "${{ steps.cache-file.outputs.file }}"
+
+    - name: Pull and save Docker image on cache miss
+      if: steps.docker-image-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p ~/image-cache
+        docker pull "${{ inputs.image }}"
+        docker image save "${{ inputs.image }}" --output "${{ steps.cache-file.outputs.file }}"
+
+    - name: Cache Composer packages
+      uses: actions/cache@v5
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      shell: bash
+      run: composer install --prefer-dist --no-progress
+
+
+
