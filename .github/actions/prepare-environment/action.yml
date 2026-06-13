@@ -15,13 +15,22 @@ runs:
       run: |
         set -euo pipefail
         cache_dir="/tmp/ether-scan-image-cache"
-        sanitized_image="${{ inputs.image }}"
+        image="${{ inputs.image }}"
+        tag="${image##*:}"
+        use_cache="false"
+        if [[ "$tag" =~ [0-9] ]]; then
+          use_cache="true"
+        fi
+
+        sanitized_image="$image"
         sanitized_image="${sanitized_image//\//-}"
         sanitized_image="${sanitized_image//:/-}"
         echo "file=${cache_dir}/${sanitized_image}.tar" >> "$GITHUB_OUTPUT"
         echo "key=docker-image-${{ runner.os }}-${sanitized_image}" >> "$GITHUB_OUTPUT"
+        echo "use-cache=${use_cache}" >> "$GITHUB_OUTPUT"
 
     - name: Check cache for Docker image
+      if: steps.cache-file.outputs.use-cache == 'true'
       id: docker-image-cache
       uses: actions/cache@v5
       with:
@@ -29,18 +38,23 @@ runs:
         key: ${{ steps.cache-file.outputs.key }}
 
     - name: Load cached Docker image
-      if: steps.docker-image-cache.outputs.cache-hit == 'true'
+      if: steps.cache-file.outputs.use-cache == 'true' && steps.docker-image-cache.outputs.cache-hit == 'true'
       shell: bash
       run: docker image load --input "${{ steps.cache-file.outputs.file }}"
 
     - name: Pull and save Docker image on cache miss
-      if: steps.docker-image-cache.outputs.cache-hit != 'true'
+      if: steps.cache-file.outputs.use-cache == 'true' && steps.docker-image-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         set -euo pipefail
         mkdir -p /tmp/ether-scan-image-cache
         docker pull "${{ inputs.image }}"
         docker image save "${{ inputs.image }}" --output "${{ steps.cache-file.outputs.file }}"
+
+    - name: Pull Docker image without cache
+      if: steps.cache-file.outputs.use-cache != 'true'
+      shell: bash
+      run: docker pull "${{ inputs.image }}"
 
     - name: Cache Composer packages
       uses: actions/cache@v5
