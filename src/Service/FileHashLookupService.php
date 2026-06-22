@@ -105,7 +105,8 @@ class FileHashLookupService
             '9be2a297a0de28ee53a2eb46efa45ac2' => ['2.7.3', '2.7.3'],
             'c844c72dc38ff4fc8da493d2dabb50aa' => ['3.0.0', '3.1.0'],
             '1b787f7a02bf7c3baf15f8decadd9d9e' => ['3.2.0', '3.2.0'],
-            'c9f74c129a656b4af12ee21b473cd9e5' => ['3.3.0', null],
+            'c9f74c129a656b4af12ee21b473cd9e5' => ['3.3.0', '3.3.1'],
+            'd34be92582d96aac77b8c4f9d48ef5b0' => ['3.3.2', null],
         ],
         'static/css/iframe_editor.css' => [
             '311d86de82a2adc7d9a1f5da4a3411f7' => ['1.7.0', '1.8.0'],
