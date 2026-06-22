@@ -67,7 +67,7 @@ readonly class PadSocketIoScanner
         VersionRangeService $versionRangeService,
         Config $config,
     ): void {
-        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $config->baseUrl . 'socket.io/', [
+        $socketIoClient = new ElephantClient(ElephantClient::engine($socketIoVersion, $config->baseUrl, [
             'persistent' => false,
             'context' => [
                 'ssl' => [
