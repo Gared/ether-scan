@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -118,7 +118,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -   name: Checkout repository
-          uses: actions/checkout@v6
+          uses: actions/checkout@v7
 
       -   name: Prepare environment
           uses: ./.github/actions/prepare-environment
@@ -181,7 +181,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone etherpad repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ether/etherpad
           path: etherpad
@@ -200,7 +200,7 @@ jobs:
           working-directory: etherpad
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: app
 
@@ -234,7 +234,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone etherpad repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         repository: ether/etherpad
         path: etherpad
@@ -256,7 +256,7 @@ jobs:
         working-directory: etherpad
 
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         path: app
 
@@ -297,7 +297,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -332,7 +332,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -397,7 +397,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
@@ -448,7 +448,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Prepare environment
         uses: ./.github/actions/prepare-environment
