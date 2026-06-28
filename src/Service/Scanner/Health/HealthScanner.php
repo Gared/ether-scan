@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Gared\EtherScan\Service\Scanner\Health;
 
 use Gared\EtherScan\Model\Config;
+use Gared\EtherScan\Model\VersionRange;
 use Gared\EtherScan\Service\ScannerServiceCallbackInterface;
 use Gared\EtherScan\Service\VersionRangeService;
 use GuzzleHttp\Client;
@@ -35,6 +36,11 @@ readonly class HealthScanner
 
         if (is_array($healthData) === false || array_key_exists('releaseId', $healthData) === false || is_string($healthData['releaseId']) === false) {
             $callback->onHealthException(new HealthResponseException('Invalid realeaseId. Response body: ' . $response->getBody()));
+            return;
+        }
+
+        if (preg_match(VersionRange::VERSION_REGEX, $healthData['releaseId']) === 0) {
+            $callback->onHealthException(new HealthResponseException('Invalid version in realeaseId: ' . $healthData['releaseId']));
             return;
         }
 

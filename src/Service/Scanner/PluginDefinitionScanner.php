@@ -31,6 +31,7 @@ readonly class PluginDefinitionScanner
                 }
 
                 $onlyPlugins = $data['plugins'];
+                unset($onlyPlugins['ep_etherpad-lite']);
                 $callback->onScanPluginsList($onlyPlugins);
             } catch (JsonException $e) {
                 $callback->onScanApiException($e);
