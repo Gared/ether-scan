@@ -186,7 +186,7 @@ jobs:
           repository: ether/etherpad
           path: etherpad
           ref: 1.7.0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: "8.9"
       - uses: JarvusInnovations/background-action@v1
@@ -238,7 +238,7 @@ jobs:
       with:
         repository: ether/etherpad
         path: etherpad
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@v7
       with:
         node-version: 24
     - uses: JarvusInnovations/background-action@v1
