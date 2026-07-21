@@ -38,16 +38,17 @@ class ScannerService
     {
         $stack = new HandlerStack(Utils::chooseHandler());
         $stack->push(Middleware::httpErrors(), 'http_errors');
+        $stack->push(Middleware::auth(), 'auth');
         $stack->push(Middleware::cookies(), 'cookies');
 
         $this->client = new Client([
-            'timeout' => 10.0,
-            'connect_timeout' => 2.0,
+            RequestOptions::TIMEOUT => 10.0,
+            RequestOptions::CONNECT_TIMEOUT => 2.0,
             RequestOptions::HEADERS => [
                 'User-Agent' => 'EtherpadScanner/4.0.0',
             ],
             'handler' => $stack,
-            'verify' => false,
+            RequestOptions::VERIFY => false,
         ]);
 
         $versionLookup = new ApiVersionLookupService();
