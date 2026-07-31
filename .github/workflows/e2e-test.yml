@@ -189,7 +189,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "8.9"
-      - uses: JarvusInnovations/background-action@v1
+      - uses: JarvusInnovations/background-action@v2
         name: Start etherpad service
         with:
           run: bin/run.sh &
@@ -241,7 +241,7 @@ jobs:
     - uses: actions/setup-node@v7
       with:
         node-version: 24
-    - uses: JarvusInnovations/background-action@v1
+    - uses: JarvusInnovations/background-action@v2
       name: Start etherpad service
       with:
         run: |
